@@ -1,0 +1,240 @@
+{# c:\.vscode\HelpDesk\Mesa_de_Ayuda\templates\superadmin\reporte_template.html #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Tickets</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: 10pt;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #0056b3; /* Azul oscuro */
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        h1 { font-size: 18pt; }
+        h2 { font-size: 14pt; }
+        h3 { font-size: 12pt; margin-top: 15px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f2f2f2; /* Gris claro */
+            font-weight: bold;
+        }
+        .filters {
+            background-color: #eef; /* Azul muy claro */
+            padding: 10px;
+            border: 1px solid #ccd;
+            margin-bottom: 20px;
+            font-size: 9pt;
+        }
+        .filters strong { display: inline-block; min-width: 100px; }
+        .no-data { color: #888; font-style: italic; }
+        .grafico { text-align: center; margin-top: 20px; }
+        .grafico img { max-width: 90%; height: auto; border: 1px solid #ccc; }
+
+        /* WeasyPrint specific page numbering */
+        @page {
+            size: A4;
+            margin: 1.5cm; /* Márgenes */
+
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 8pt;
+                color: #555;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Reporte de Tickets</h1> <!-- TITULO DEL PDF -->
+    <p>Generado el: {{ fecha_hoy|date:"d/m/Y" }} por {{ superadmin_user.username }}</p> <!-- FECHA DE GENERACIÓN -->
+
+    {% if reporte_data.filtro_aplicados %} <!-- VALIDAMOS QUE EXISTAN FILTROS -->
+    <div class="filters">
+        <h3>Filtros Aplicados</h3>
+        {% if reporte_data.filtro_aplicados.fecha_inicio or reporte_data.filtro_aplicados.fecha_fin %}
+            <p><strong>Periodo:</strong>
+               {% if reporte_data.filtro_aplicados.fecha_inicio %}{{ reporte_data.filtro_aplicados.fecha_inicio|date:"d/m/Y" }}{% else %}Inicio{% endif %}
+               -
+               {% if reporte_data.filtro_aplicados.fecha_fin %}{{ reporte_data.filtro_aplicados.fecha_fin|date:"d/m/Y" }}{% else %}Fin{% endif %}
+            </p>
+        {% endif %}
+        {% if reporte_data.filtro_aplicados.area_agencia %}
+            <p><strong>Área/Agencia Seleccionada:</strong> {{ reporte_data.filtro_aplicados.area_agencia }}</p> {# Muestra el filtro aplicado #}
+        {% endif %}
+         {% if reporte_data.filtro_aplicados.categoria %}
+            <p><strong>Categoría:</strong> {{ reporte_data.filtro_aplicados.categoria }}</p>
+        {% endif %}
+        {% if reporte_data.filtro_aplicados.motivo_cierre %}
+            <p><strong>Motivo Cierre:</strong> {{ reporte_data.conteo_motivo_cierre.motivo }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Reporte 1: Conteo por Estado (sin cambios) -->
+    <h2>Resumen por Estado</h2>
+    {% if reporte_data.conteo_estados %}
+    <table>
+        <thead>
+            <tr>
+                <th>Estado</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Abiertos</td><td>{{ reporte_data.conteo_estados.abierto }}</td></tr>
+            <tr><td>En Progreso</td><td>{{ reporte_data.conteo_estados.en_progreso }}</td></tr>
+            <tr><td>Cerrados</td><td>{{ reporte_data.conteo_estados.cerrado }}</td></tr>
+        </tbody>
+    </table>
+    {% else %}
+        <p class="no-data">No hay datos de conteo por estado.</p>
+    {% endif %}
+
+    <!-- Reporte 2: Promedio de Solución (sin cambios) -->
+    <h2>Tiempo Promedio de Solución</h2>
+    {% if reporte_data.promedio_solucion %}
+        <p>El tiempo promedio para cerrar los tickets (basado en los filtros aplicados) es: <strong>{{ reporte_data.promedio_solucion }}</strong>.</p>
+        <p><small>(Calculado sobre tickets cerrados con fecha de creación y cierre)</small></p>
+    {% else %}
+        <p class="no-data">No se pudo calcular el promedio (no hay tickets cerrados aplicables en el filtro).</p>
+    {% endif %}
+
+    <!-- Reporte 3: Consolidado por Área/Agencia (MODIFICADO) -->
+    <h2>Tickets por Ubicación</h2>
+
+    {# Tabla para Agencias/Corresponsales #}
+    <h3 class="sub-section">Por Agencia/Corresponsal</h3>
+    {% if reporte_data.consolidado_agencia %}
+    <table>
+        <thead>
+            <tr>
+                <th>Agencia/Corresponsal</th>
+                <th>Cantidad de Tickets</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in reporte_data.consolidado_agencia %}
+            <tr>
+                <td>{{ item.agencia_corresponsal|default:"(No especificada)" }}</td> {# <-- Campo correcto #}
+                <td>{{ item.count }}</td>
+            </tr>
+            {% empty %}
+             <tr><td colspan="2" class="no-data">No hay tickets asociados a Agencias/Corresponsales para los filtros aplicados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="no-data">No hay datos de tickets por Agencia/Corresponsal para los filtros aplicados.</p>
+    {% endif %}
+
+    {# Tabla para Áreas Administrativas #}
+    <h3 class="sub-section">Por Área Administrativa</h3>
+    {% if reporte_data.consolidado_administrativa %}
+    <table>
+        <thead>
+            <tr>
+                <th>Área Administrativa</th>
+                <th>Cantidad de Tickets</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in reporte_data.consolidado_administrativa %}
+            <tr>
+                <td>{{ item.administrativa|default:"(No especificada)" }}</td> {# <-- Campo correcto #}
+                <td>{{ item.count }}</td>
+            </tr>
+            {% empty %}
+             <tr><td colspan="2" class="no-data">No hay tickets asociados a Áreas Administrativas para los filtros aplicados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="no-data">No hay datos de tickets por Área Administrativa para los filtros aplicados.</p>
+    {% endif %}
+    {# --- Fin de la sección modificada --- #}
+
+
+    <!-- Reporte 4: Por Motivo de Cierre (sin cambios) -->
+    <h2>Tickets por Motivo de Cierre</h2>
+    {% if reporte_data.conteo_motivo_cierre %}
+        <p>Cantidad de tickets cerrados con motivo "<strong>{{ reporte_data.conteo_motivo_cierre.motivo }}</strong>": <strong>{{ reporte_data.conteo_motivo_cierre.cantidad }}</strong></p>
+    {% elif reporte_data.conteo_todos_motivos %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Motivo de Cierre</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in reporte_data.conteo_todos_motivos %}
+                <tr>
+                    <td>{{ item.motivo }}</td>
+                    <td>{{ item.cantidad }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="no-data">No hay tickets cerrados con motivo especificado en el filtro.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-data">No hay datos de tickets por motivo de cierre para los filtros aplicados.</p>
+    {% endif %}
+
+     <!-- Reporte 5: Por Categoría (Tipo Soporte) (sin cambios) -->
+    <h2>Tickets por Categoría (Tipo Soporte)</h2>
+    {% if reporte_data.conteo_categoria %}
+        <p>Cantidad de tickets de la categoría "<strong>{{ reporte_data.conteo_categoria.categoria }}</strong>": <strong>{{ reporte_data.conteo_categoria.cantidad }}</strong></p>
+    {% elif reporte_data.conteo_todas_categorias %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Categoría (Tipo Soporte)</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in reporte_data.conteo_todas_categorias %}
+                <tr>
+                    <td>{{ item.tipo_soporte }}</td>
+                    <td>{{ item.cantidad }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="no-data">No hay tickets por categoría en el filtro.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-data">No hay datos de tickets por categoría para los filtros aplicados.</p>
+    {% endif %}
+
+
+    <!-- Reporte 6: Gráfico Mensual (sin cambios) -->
+    {% if grafico_mensual_b64 %}
+    <h2>Estadísticas Mensuales</h2>
+    <div class="grafico" style="text-align: center; margin-top: 20px;">
+        <img src="{{ grafico_mensual_b64 }}" alt="Gráfico de Tickets Mensuales" style="max-width: 90%; height: auto; border: 1px solid #ccc;">
+    </div>
+    {% elif request.GET.generar_grafico == 'true' %}
+        <h2>Estadísticas Mensuales</h2>
+        <p class="no-data">No hay suficientes datos para generar el gráfico con los filtros aplicados.</p>
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+# Archivos de Bytecode de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entorno virtual
+env/
+venv/
+ENV/
+
+# Archivos de configuración de IDE
+.vscode/
+.idea/
+
+# Archivos de dependencias de Python
+*.egg-info/
+pip-wheel-metadata/
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg
+
+# Archivos de secretos y configuración local
+.env
+*.env
+
+# Base de datos local
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de logs
+*.log
+logs/
+
+# Archivos estáticos y de medios subidos por usuarios
+staticfiles/
+media/
+adjuntos/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

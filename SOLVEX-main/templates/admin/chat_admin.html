@@ -1,0 +1,1185 @@
+{% load static %}
+<!-- 
+    SOLVEX HelpDesk - Detalle de Ticket
+    Vista diseñada específicamente para la interacción con un ticket particular,
+    incluyendo su historial de comunicaciones y opción para agregar comentarios.
+    
+    Diferencias con la vista de índice:
+    - Layout optimizado para conversación (tipo chat)
+    - Más espacio dedicado al contenido principal del ticket
+    - Formulario para agregar comentarios anclado en la parte inferior
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpDesk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        /* Estilos personalizados */
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #e7f1ff;
+            --sidebar-width: 280px;
+            --min-app-width: 1024px;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            min-width: var(--min-app-width); /* Establecer ancho mínimo */
+            overflow-x: auto; /* Permitir scroll horizontal si la ventana es más pequeña */
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+        
+        /* ==== SIDEBAR NAVIGATION ==== */
+        .sidebar {
+            background: linear-gradient(325deg, #2a71fa, #000000);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1030;
+            top: 0;
+            left: 0;
+        }
+
+        .message-system {
+            align-self: center;
+            background-color: #f0f0f0;
+            color: #555;
+            border: 1px dashed #ccc;
+            font-style: italic;
+            max-width: 90%;
+            {% comment %} z-index: 1030;
+            top: 0;
+            left: 0; {% endcomment %}
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar h5 {
+            padding: 10px 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            color: #ffffffcc;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 6px 15px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .logout-button {
+            margin-top: auto;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            width: 100%;
+            margin: 30px auto 10px;
+            display: block;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .logout-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
+        
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .content-area {
+            padding: 20px;
+        }
+        
+        .page-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color:rgb(255, 255, 255);   
+        }
+        /* Badges mejorados */
+        .badge {
+            {% comment %} padding: 8px 12px; {% endcomment %}
+            font-weight: 500;
+            {% comment %} letter-spacing: 0.5px; {% endcomment %}
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .badge.badge-abierto {
+            background: #2a71fa;
+            color: white;
+        }
+
+        .badge.badge-en-progreso {
+            background:rgb(255, 213, 0);
+            color: #343a40;
+        }
+
+        .badge.badge-cerrado {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+        .card-pending {
+            background: linear-gradient(45deg, #ffc107, #ffda6a);
+            color: #212529;
+        }
+        
+        .card-open {
+            background: #2a71fa;
+            color: white;
+        }
+        
+        .card-progress {
+            background:rgb(255, 213, 0);
+            color: #343a40;
+        }
+        
+        .card-resolved {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+        .ticket-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0px;
+        }
+        
+        .ticket-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+        
+        .ticket-info {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6c757d;
+        }
+        
+        .ticket-info-separator {
+            color: #adb5bd;
+        }
+        
+        .ticket-attachment {
+            color: var(--primary-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .ticket-attachment:hover {
+            color: var(--dark-blue);
+            text-decoration: underline;
+        }
+        
+        /* Tabla de tickets */
+        .table th button {
+            background: none;
+            border: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            cursor: pointer;
+        }
+        
+        /* Chat container */
+        .chat-container {
+            max-height: 50vh;
+            min-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            margin-bottom: 15px;
+            margin-top: 15px;
+
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .message-user {
+            align-self: flex-end;
+            background-color: var(--light-blue);
+            border-bottom-right-radius: 0;
+        }
+        
+        .message-other {
+            align-self: flex-start;
+            background-color: white;
+            border-bottom-left-radius: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .message-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+        
+        /* Formulario de comentario */
+        .comment-form {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid #dee2e6;
+        }
+        
+        .comment-input {
+            flex: 1;
+        }
+        
+        .file-upload-wrapper {
+            position: relative;
+            width: auto;
+        }
+        
+        .send-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- SIDEBAR -->
+            <div class="col-auto col-md-3 col-xl-2 sidebar">
+                <div class="text-center mb-4 mt-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <img src="{% static 'images/SOLVEX_.png' %}" alt="Logo" style="max-width: 100%">
+                    </div>
+                </div>
+
+                {% if es_superadmin %}
+                <!-- Si es superadministrador, mostrar el logo de superadministrador -->
+                <div class="user-welcome py-2 px-3 mb-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-0">{{ superadmin_user.nombre }}</h5>
+                    <p class="mb-0 text-white-50">Superadministrador</p>
+                </div>
+
+                <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>Menú Principal</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:superadmin_dashboard' %}" class="nav-link active">
+                            <i class="bi bi-speedometer2"></i>Dashboard
+                        </a>
+                    </li>
+                </ul>
+
+                <h5><i class="bi bi-gear-fill me-2"></i>Administración</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:reporte_superadmin' %} " class="nav-link">
+                            <i class="bi bi-bar-chart"></i>Reportes
+                        </a>
+                    </li>
+                </ul>
+                {% else %}
+                <!-- Si no es superadministrador, mostrar el logo de usuario normal -->
+                <div class="user-welcome py-2 px-3 mb-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-0">Bienvenid@ {{ admin_user.nombre }}</h5>
+                </div>
+                <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>Menú Principal</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:admin_dashboard' %}" class="nav-link active">
+                            <i class="bi bi-box"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:tickets_resueltos' %}" class="nav-link">
+                            <i class="bi bi-check-circle me-2"></i>Tickets Resueltos
+                        </a>
+                    </li>
+                </ul>
+                <h5><i class="bi bi-gear-fill me-2"></i>Administración</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:cambiar_contrasena' %}" class="nav-link">
+                            <i class="bi bi-person me-2"></i>Perfil
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+                <form action="{% url 'logout' %}" method="post" class="mt-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                    </button>
+                </form>
+                <div class="div-footer text-lg-center ">
+                    <p><strong>©Equipo desarrollo T.I. 2025</strong></p>
+                </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="col main-content">
+
+                {# --- POPUP PARA MENSAJES --- #}
+                <div id="popup-message" class="popup" style="display:none; position: fixed; top: 20px; right: 20px; background-color: #4CAF50; color: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 1050;">
+                    <span id="popup-message-text"></span>
+                    <button onclick="closePopup()" style="float: right; margin-left: 10px; background: none; border: none; color: white; font-weight: bold; cursor: pointer;">
+                        &times;
+                    </button>
+                </div>
+            
+                <script>
+                    function closePopup() {
+                        document.getElementById('popup-message').style.display = 'none';
+                    }
+                </script>
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h1 class="page-header m-0 d-flex align-items-center">
+                            <i class="bi bi-ticket-detailed me-2"></i>
+                            Detalle de TICKET
+                        </h1>
+                        <div class="d-flex">
+                            {% if not es_superadmin %}
+                                <button id="btnTomarTicket" type="button" class="btn text-white btn-sm me-2" data-bs-toggle="modal" data-bs-target="#tomarTicketModal" style="display: none;">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> <strong>Tomar Ticket</strong>
+                                </button>
+                                <button id="btnReasignarTicket" type="button" class="btn btn-sm text-white me-2" data-bs-toggle="modal" data-bs-target="#reasignarTicketModal" style="display: none;">
+                                    <i class="bi bi-arrow-repeat me-1"></i> <strong>Reasignar</strong>
+                                </button>
+                            
+                                <button id="btnCerrarTicket" type="button" class="btn btn-sm text-white" data-bs-toggle="modal" data-bs-target="#cerrarTicketModal" style="display: none;">
+                                    <i class="bi bi-check2-circle me-1"></i> <strong>Marcar como Resuelto / Cerrar</strong>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                
+                    <div class="card-body">
+                        <h2 class="ticket-title">{{ ticket.motivo }}</h2>
+                
+                        <div class="ticket-info">
+                            <span>{{ ticket.usuario.nombre }}</span>
+                            <i class="bi bi-chevron-double-right ticket-info-separator"></i>
+                            <span>{{ ticket.usuario.cargo }}</span>
+                            <i class="bi bi-chevron-double-right ticket-info-separator"></i>
+                            <span>{{ ticket.usuario.area_agencia }}</span>
+                            <i class="bi bi-chevron-double-right ticket-info-separator"></i>
+                            {% if ticket.adjuntos %}
+                            <a href="{{ ticket.adjuntos.url }}" target="_blank" class="ticket-attachment">
+                                <i class="bi bi-paperclip me-1"></i>Ver Adjunto
+                            </a>
+                            {% else %}
+                            <span class="text-muted"><i class="bi bi-exclamation-circle me-1"></i>Sin Adjunto</span>
+                            {% endif %}
+                        </div>
+                
+                        <div class="table-responsive mt-2">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        {% for value2 in tickets_generales %}
+                                        <th>
+                                            <span class="text-decoration-none p-0 fw-bold d-flex align-items-center text-primary" data-field="{{ value2 }}">
+                                                {{ value2 }}
+                                            </span>
+                                        </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketTableBody">
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'tickets:admin_ticket_detail' ticket.id %}" class="text-primary text-decoration-none">{{ ticket.id }}</a>
+                                        </td>
+                                        <td>{{ ticket.tipo_soporte }}</td>
+                                        <td>
+                                            {% if ticket.agencia_corresponsal != 'No Aplica' %}
+                                                {{ ticket.agencia_corresponsal }}
+                                            {% elif ticket.administrativa != 'No Aplica' %}
+                                                {{ ticket.administrativa }}
+                                            {% else %}
+                                                No aplica
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill 
+                                                {% if ticket.id_estado == 'abierto' %}badge-abierto
+                                                {% elif ticket.id_estado == 'en_progreso' %}badge-en-progreso
+                                                {% elif ticket.id_estado == 'cerrado' %}badge-cerrado
+                                                {% else %}bg-primary{% endif %}">
+                                                {% if ticket.id_estado == 'abierto' %}
+                                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                                {% elif ticket.id_estado == 'en_progreso' %}
+                                                    <i class="bi bi-hourglass-split me-1"></i>
+                                                {% elif ticket.id_estado == 'cerrado' %}
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                {% endif %}
+                                                {{ ticket.get_id_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if ticket.id_prioridad == 'alta' %}
+                                                <span class="text-danger">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Alta
+                                                </span>
+                                            {% elif ticket.id_prioridad == 'media' %}
+                                                <span class="text-warning">
+                                                    <i class="bi bi-dash-circle-fill me-1"></i>Media
+                                                </span>
+                                            {% elif ticket.id_prioridad == 'baja' %}
+                                                <span class="text-success">
+                                                    <i class="bi bi-arrow-down-circle-fill me-1"></i>Baja
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ ticket.fecha_creacion }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {# --- FIN: Bloque para mostrar mensajes de Django --- #}                
+
+                <!-- CONTENEDOR DEL CHAT -->
+                <div class="chat-container" id="ChatMessages">
+                    <!-- Mensaje inicial del ticket -->
+                    <div class="message message-other">
+                        <div class="message-header">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ ticket.usuario.username }} {#-- Usuario que creó el ticket --#}
+                        </div>
+                        <div class="message-content">{{ ticket.detalle }}</div>
+                        <div class="message-time">{{ ticket.fecha_creacion }}</div>
+                    </div>
+                    
+                    <!-- Comentarios del ticket -->
+                    {% for comentario in ticket.Comentarios.all %}
+                    <div class="message {% if comentario.autor == admin_user %}message-user{% elif comentario.autor is None %}message-system{% else %}message-other{% endif %}">
+                        <div class="message-header">
+                            {% if comentario.autor is None %}
+                                <i class="bi bi-info-circle-fill me-1"></i>Sistema
+                            {% else %}
+                                <i class="bi bi-person-circle me-1"></i> {{ comentario.autor.username }}
+                            {% endif %}
+                        </div>
+                        <div class="message-content">{{ comentario.detalle_comentario }}</div>
+                        
+                        {% if comentario.adjunto %}
+                        <div class="mt-3">
+                            <a href="{{ comentario.adjunto.url }}" target="_blank" class="d-inline-block">
+                                <div class="position-relative">
+                                    <img src="{{ comentario.adjunto.url }}" alt="Adjunto" class="img-fluid rounded" style="max-width: 200px;">
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <i class="bi bi-eye-fill text-white fs-3" style="text-shadow: 0 0 8px rgba(0,0,0,0.6);"></i>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                    
+                        <div class="message-time">{{ comentario.hora_comentario }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Formulario para nuevo comentario -->
+                <div class="comment-form-container">
+                    {% if not es_superadmin %}
+                        {% if ticket.get_id_estado_display == "Cerrado" %}
+                            <div class="alert alert-warning mt-3 w-100 text-center" role="alert">
+                                Este ticket está cerrado y no se pueden enviar más comentarios.
+                            </div>
+                        {% else %}
+                            <!-- FORMULARIO SIEMPRE PRESENTE SI NO ES SUPER ADMIN Y EL TICKET NO ESTA CERRADO-->
+                            <div class="d-flex w-100 gap-2 comment-form" id="commentForm">
+                                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                                
+                                <input type="text" name="comentario" id="coment-input" class="form-control comment-input" 
+                                    placeholder="{% if can_comment %}Escribe tu comentario aquí...{% else %}Debes tomar el ticket para responder.{% endif %}" 
+                                    {% if not can_comment %}disabled{% endif %} required>
+                                
+                                <div class="file-upload-wrapper align-content-center">
+                                    <button type="button" id="adjuntoButton" class="btn btn-outline-secondary" 
+                                            onclick="document.getElementById('adjuntoFile').click()" 
+                                            {% if not can_comment %}disabled{% endif %}>
+                                        <i class="bi bi-paperclip"></i>
+                                    </button>
+                                    <input type="file" name="adjunto" id="adjuntoFile" class="d-none" {% if not can_comment %}disabled{% endif %}>
+                                </div>
+                                <button type="submit" class="btn btn-primary send-button" {% if not can_comment %}disabled{% endif %}>
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                            {% if not can_comment %}
+                                <div class="alert alert-info mt-3 w-100 text-center" role="alert">
+                                    Debes tomar este ticket para poder responder.
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info mt-3 w-100 text-center" role="alert">
+                            <strong>El chat no está disponible para superadministradores.</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    <!-- MODAL PARA TOMAR EL TICKET -->
+    
+    <div class="modal fade" id="tomarTicketModal" tabindex="-1" aria-labelledby="tomarTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{% url 'usuario:tomar_ticket' ticket.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tomarTicketModalLabel">TOMAR TICKET</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>¿Está seguro de que deseas tomar este ticket?</strong> Cambiará el estado del ticket y será asignado a su Usuario</p>
+                        <p><strong>Ticket:</strong> {{ ticket.id }} - {{ticket.motivo}}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Tomar Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA REASIGNAR EL TICKET-->
+
+    <div class="modal fade" id="reasignarTicketModal" tabindex="-1" aria-labelledby="reasignarTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{% url 'usuario:reasignar_ticket' ticket.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reasignarTicketModalLabel">REASIGNAR TICKET #{{ ticket.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nuevo_tipo_soporte" class="form-label">Tipo de Soporte</label>
+                            <select class="form-select" id="nuevo_tipo_soporte" name="tipo_soporte" required>
+                                <option value="" selected disabled>Seleccione tipo de soporte...</option>
+                                {% for value, display in ticket.TIPO_DE_SOPORTE %}
+                                    <option value="{{ value }}">{{ display }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comentario" class="form-label">Comentario por el cual reasigna el ticket</label>
+                            <textarea class="form-control" id="comentario" name="comentario" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Reasignar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA CERRAR EL TICKET -->
+
+    <div class="modal fade" id="cerrarTicketModal" tabindex="-1" aria-labelledby="cerrarTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{% url 'usuario:cerrar_ticket' ticket.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cerrarTicketModalLabel">CERRAR TICKET #{{ ticket.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="motivoCierre" class="form-label">Motivo de Cierre <span class="text-danger">*</span></label>
+                            <select class="form-select" id="motivoCierre" name="motivo_cierre" required>
+                                <option value="" disabled selected>Selecciona un motivo...</option>
+                                {% for value, display in ticket.MOTIVO_CIERRE_CHOICES %}
+                                    <option value="{{ value }}">{{ display }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comentario-cierre" class="form-label">Comentario por el cual cierra el ticket</label>
+                            <textarea class="form-control" id="comentario-cierre" name="comentario-cierre" rows="3"></textarea>
+                        </div>
+                        <p class="small text-danger">Una vez cerrado el ticket, no podrá ser reabierto.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Confirmar Cierre</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("SCRIPT DE CHAT_ADMIN.HTML CARGADO Y EJECUTÁNDOSE");
+            window.canAdminCommentGlobally = {{ can_comment|lower }};
+            window.ticketIsNotClosed = "{{ticket.get_id_estado_display|escapejs}}" !== 'Cerrado';
+            window.isCurrentUserSuperadmin = {{ es_superadmin|lower }};
+            
+            /**
+            *TODO: CONFIGURACION Y ELEMENTOS DEL DOM
+            */
+
+            // --- Configuración Inicial ---
+            const ticketId = {{ ticket.id }};
+            const currentUserUsername = "{{ admin_user.username|escapejs }}";
+            const maxReconnectAttempts = 5;
+            
+            // --- Elementos del DOM ---
+            const chatMessages = document.getElementById('ChatMessages');
+            const commentForm = document.getElementById('commentForm');
+            const commentInput = document.getElementById('coment-input');
+            const sendButton = commentForm ? commentForm.querySelector('.send-button') : null;
+            const adjuntoFileInput = document.getElementById('adjuntoFile');
+            const adjuntoButton = document.getElementById('adjuntoButton');
+            const popup = document.getElementById('popup-message');
+            const popupText = document.getElementById('popup-message-text');
+            
+            /**
+            *TODO: FUNCIONES DE UTILIDAD
+            */
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function closePopup() {
+                if (popup) popup.style.display = 'none';
+            }
+
+            function showErrorMessage(message) {
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger mt-2 alert-dismissible fade show';
+                errorAlert.innerHTML = `<i class="bi bi-exclamation-circle me-2"></i>${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                const formContainer = document.querySelector('.comment-form-container');
+                if (formContainer) {
+                    formContainer.insertBefore(errorAlert, commentForm ? commentForm.nextSibling : formContainer.firstChild);
+                }
+                setTimeout(() => { if (errorAlert.parentNode) errorAlert.remove(); }, 5000);
+            }
+
+            function showConnectionMessage() {
+                let connectionAlert = document.getElementById('connectionAlertAdmin');
+                if (!connectionAlert) {
+                    connectionAlert = document.createElement('div');
+                    connectionAlert.id = 'connectionAlertAdmin';
+                    connectionAlert.className = 'alert alert-warning mt-2';
+                    connectionAlert.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>Conexión perdida, intentando reconexión...`;
+                    const formContainer = document.querySelector('.comment-form-container');
+                    if (formContainer) {
+                        formContainer.insertBefore(connectionAlert, commentForm ? commentForm.nextSibling : formContainer.firstChild);
+                    }
+                }
+            }
+
+            function hideConnectionMessage() {
+                const connectionAlert = document.getElementById('connectionAlertAdmin');
+                if (connectionAlert) {
+                    connectionAlert.remove();
+                }
+            }
+
+            /**
+            *TODO: MANEJO DE POPUPS
+            */
+
+            function initPopupMessage() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const successMessage = urlParams.get('success_message');
+
+                if (successMessage && popup && popupText) {
+                    popupText.textContent = successMessage;
+                    popup.style.display = 'block';
+                    urlParams.delete('success_message');
+                    history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+                    setTimeout(closePopup, 5000);
+                }
+            }
+
+            /**
+            *TODO: MANEJO DEL BOTON ADJUNTO
+            */
+
+            function initAttachmentButton() {
+                if (adjuntoFileInput && adjuntoButton) {
+                    adjuntoFileInput.addEventListener('change', function() {
+                        if (this.files && this.files.length > 0) {
+                            adjuntoButton.classList.remove('btn-outline-secondary');
+                            adjuntoButton.classList.add('btn-success');
+                        } else {
+                            adjuntoButton.classList.remove('btn-success');
+                            adjuntoButton.classList.add('btn-outline-secondary');
+                        }
+                    });
+                } else {
+                    console.log("Botón de adjunto ('adjuntoButton') o input de archivo ('adjuntoFile') no encontrado.");
+                }
+            }
+
+            /**
+            *TODO: WEBSOCKET Y CHAT EN TIEMPO REAL
+            */
+
+            let chatSocket = null;
+            let reconnectAttempts = 0;
+            let reconnectInterval = 1000;
+
+            function updateConnectionStatus(connected) {
+                const enableChatControls = connected && window.canAdminCommentGlobally && window.ticketIsNotClosed;
+                
+                // CORRECCIÓN: Operador de negación estaba mal aplicado
+                if (commentInput) commentInput.disabled = !enableChatControls;
+                if (sendButton) sendButton.disabled = !enableChatControls;
+                if (adjuntoButton) adjuntoButton.disabled = !enableChatControls;
+
+                if (connected) {
+                    if (commentInput) commentInput.placeholder = window.canAdminCommentGlobally ? 'Escribe tu comentario aquí...' : 'Debes tomar el ticket para responder.';
+                    hideConnectionMessage();
+                } else {
+                    if (commentInput) commentInput.placeholder = 'Conectando al Chat...';
+                    showConnectionMessage();
+                }
+            }
+
+            function resetFormAndButton() {
+                if (commentInput) commentInput.value = '';
+                if (adjuntoFileInput) adjuntoFileInput.value = ''; // Limpiar el input de archivo
+                if (adjuntoButton) {
+                    adjuntoButton.classList.remove('btn-success');
+                    adjuntoButton.classList.add('btn-outline-secondary');
+                }
+            }
+
+
+
+            function restoreSendButton() {
+                if (!sendButton) return;
+                sendButton.innerHTML = '<i class="bi bi-send-fill"></i>';
+                if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    sendButton.disabled = false;
+                }
+            }
+
+            function addMessageToChat(data) {
+                if (!data || !chatMessages) return;
+                
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(data.is_system ? 'message-system' : (data.author === currentUserUsername ? 'message-user' : 'message-other'));
+                
+                const timestamp = new Date(data.timestamp).toLocaleString('es-CO', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: true 
+                });
+
+                // VALIDAR QUE EL NOMBRE DEL AUTOR Y EL ICONO COINCIDAN
+                const authorName = data.is_system ? "Sistema" : escapeHtml(data.author);
+                const authorIcon = data.is_system ? '<i class="bi bi-info-circle-fill me-1"></i>' : '<i class="bi bi-person-circle me-1"></i>';
+
+                let attachmentHtml = '';
+                if (data.attachment_url && data.attachment_name) {
+                    const isImage = /\.(jpeg|jpg|gif|png|svg)$/i.test(data.attachment_name);
+                    if (isImage) {
+                        attachmentHtml = `
+                        <div class="mt-3">
+                            <a href="${escapeHtml(data.attachment_url)}" target="_blank" class="d-inline-block">
+                                <div class="position-relative">
+                                    <img src="${escapeHtml(data.attachment_url)}" alt="${escapeHtml(data.attachment_name)}" class="img-fluid rounded" style="max-width: 200px; max-height: 200px; object-fit: cover;">
+                                    <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-50 p-2 rounded-circle">
+                                        <i class="bi bi-eye-fill text-white fs-4"></i>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>`;
+                    } else {
+                        attachmentHtml = `
+                        <div class="mt-2">
+                            <a href="${escapeHtml(data.attachment_url)}" target="_blank" class="ticket-attachment">
+                                <i class="bi bi-paperclip me-1"></i> ${escapeHtml(data.attachment_name)}
+                            </a>
+                        </div>`;
+                    }
+                }
+
+                messageElement.innerHTML = `
+                    <div class="message-header">
+                        ${authorIcon} ${authorName}
+                    </div>
+                    <div class="message-content">${escapeHtml(data.message)}</div>
+                    ${attachmentHtml}
+                    <div class="message-time">${timestamp}</div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                
+                // Desplazamiento suave al final después de añadir el mensaje //
+                setTimeout(() => {
+                    if (chatMessages) {
+                        console.log('[Admin Chat] New message scroll: Attempting. scrollHeight:', chatMessages.scrollHeight, 'clientHeight:', chatMessages.clientHeight);
+                        chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+                    } else {
+                        console.error('[Admin Chat] New message scroll: chatMessages element NOT FOUND.');
+                    }
+                }, 0);
+            }
+
+            function updateTicketStatusInUI(data) {
+                const statusBadgeContainer = document.querySelector('#ticketTableBody td:nth-child(4) span.badge'); // Selector más específico
+                if (!statusBadgeContainer) return;
+
+                let badgeClass = 'bg-primary', iconClass = 'bi-info-circle';
+                
+                if (data.new_status_value === 'abierto') { 
+                    badgeClass = 'badge-abierto'; 
+                    iconClass = 'bi-exclamation-circle'; 
+                } else if (data.new_status_value === 'en_progreso') { 
+                    badgeClass = 'badge-en-progreso'; 
+                    iconClass = 'bi-hourglass-split'; 
+                } else if (data.new_status_value === 'cerrado') { 
+                    badgeClass = 'badge-cerrado'; 
+                    iconClass = 'bi-check-circle'; 
+                }
+                
+                // Actualizar clases y contenido del badge existente
+                statusBadgeContainer.className = `badge rounded-pill ${badgeClass}`; // Reemplaza todas las clases
+                statusBadgeContainer.innerHTML = `<i class="bi ${iconClass} me-1"></i> ${escapeHtml(data.new_status_display)}`;
+                console.log('[Admin Chat] Status badge UI updated to:', data.new_status_display);
+
+            }
+
+            function updateActionButtonVisibility(newStatusValue, asignadoAUUsername) {
+                const btnTomarTrigger = document.getElementById('btnTomarTicket');
+                const btnReasignarTrigger = document.getElementById('btnReasignarTicket');
+                const btnCerrarTrigger = document.getElementById('btnCerrarTicket');
+
+                // Ocultar todo primero
+                [btnTomarTrigger, btnReasignarTrigger, btnCerrarTrigger].forEach(el => {
+                    if (el) el.style.display = 'none';
+                });
+                
+                if (newStatusValue === 'abierto') {
+                    if (btnTomarTrigger) btnTomarTrigger.style.display = 'inline-block';
+                } else if (newStatusValue === 'en_progreso') {
+                    if (btnReasignarTrigger) btnReasignarTrigger.style.display = 'inline-block';
+                    if (btnCerrarTrigger) btnCerrarTrigger.style.display = 'inline-block';
+                } else if (newStatusValue === 'cerrado') {
+                    // Si el ticket está cerrado, todos los botones de acción permanecen ocultos.
+                    if (chatSocket) chatSocket.close(1000, 'Ticket Cerrado');
+                }
+            }
+
+            function handleCommentSubmit() {
+                const message = commentInput.value.trim();
+                const file = adjuntoFileInput.files.length > 0 ? adjuntoFileInput.files[0] : null;
+
+                if (!message && !file) {
+                    showErrorMessage('El comentario o el adjunto no pueden estar vacíos.');
+                    return; 
+                }
+                
+                if (message.length > 1000) { 
+                    showErrorMessage('El comentario no puede exceder los 1000 caracteres.'); 
+                    return; 
+                }
+                
+                // Límite de 5MB para el adjunto
+                if (file && file.size > 5 * 1024 * 1024) {
+                    showErrorMessage('El archivo adjunto no puede exceder los 5MB.');
+                    adjuntoFileInput.value = ''; // Limpiar selección
+                    if (adjuntoButton) {
+                        adjuntoButton.classList.remove('btn-success');
+                        adjuntoButton.classList.add('btn-outline-secondary');
+                    }
+                    return;
+                }
+
+                if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    sendButton.disabled = true;
+                    sendButton.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+                    const payload = {
+                        'message': message
+                    };
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            payload.attachment = e.target.result; // Contenido en Base64
+                            payload.attachment_name = file.name;
+                            payload.attachment_type = file.type;
+                            chatSocket.send(JSON.stringify(payload));
+                            resetFormAndButton(); // Limpia el formulario después de enviar
+                        };
+                        reader.onerror = function(e) {
+                            showErrorMessage('Error al leer el archivo adjunto.');
+                            restoreSendButton(); // Restaurar botón en caso de error de lectura
+                        };
+                        reader.readAsDataURL(file); // Lee el archivo como Base64
+                    } else {
+                        chatSocket.send(JSON.stringify(payload));
+                        resetFormAndButton(); // Limpia el formulario después de enviar
+                    }
+                } else {
+                    showErrorMessage('No hay conexión. Reintentando...');
+                    if (!chatSocket || chatSocket.readyState === WebSocket.CLOSED) {
+                        attemptReconnect();
+                    }
+                }
+            }
+
+            function attemptReconnect() {
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    console.log(`Admin Reintentando conexión (${reconnectAttempts}/${maxReconnectAttempts})`);
+                    setTimeout(initWebSocket, reconnectInterval);
+                    reconnectInterval = Math.min(reconnectInterval * 2, 30000);
+                } else {
+                    showErrorMessage('No se pudo reconectar al chat. Por favor, recarga la página.');
+                }
+            }
+
+            function initWebSocket() {
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+                const wsUrl = `${wsProtocol}://${window.location.host}/ws/ticket/${ticketId}/chat/`;
+                console.log('Admin Conectando al WebSocket:', wsUrl);
+                
+                chatSocket = new WebSocket(wsUrl);
+
+                chatSocket.onopen = function(e) {
+                    console.log('Admin WebSocket conectado exitosamente');
+                    reconnectAttempts = 0;
+                    reconnectInterval = 1000;
+                    updateConnectionStatus(true);
+                };
+
+                chatSocket.onmessage = function(e) {
+                    console.log('Admin Mensaje recibido:', e.data);
+                    try {
+                        const data = JSON.parse(e.data);
+                        console.log('Admin Mensaje parseado:', data);
+                        
+                        if (data.type === 'ticket_status_update') {
+                            console.log('Admin: Procesado ticket_status_update. System MESSAGE:', data.system_message);
+                            updateTicketStatusInUI(data);
+                            updateActionButtonVisibility(data.new_status_value, data.asignado_a_username);
+                            if (data.system_message) {
+                                addMessageToChat(data.system_message);
+                            }
+                        } else if (data.error) {
+                            showErrorMessage(data.error);
+                        } else {
+                            console.log('Admin: Procesando mensaje normal/otro:', data);
+                            addMessageToChat(data);
+                        }
+                    } catch (error) {
+                        console.error('Admin Error al procesar el mensaje:', error);
+                    }
+                    // Restaurar el botón después de procesar el mensaje
+                    setTimeout(restoreSendButton, 300);
+                };
+
+                chatSocket.onclose = function(e) {
+                    console.log('Admin WebSocket desconectado:', e.code, 'Razón:', e.reason);
+                    updateConnectionStatus(false);
+                    restoreSendButton(); // Restaurar botón en caso de cierre
+                    if (e.code !== 1000) {
+                        attemptReconnect();
+                    }
+                };
+
+                chatSocket.onerror = function(e) {
+                    console.error('Admin Error en WebSocket:', e);
+                    updateConnectionStatus(false);
+                    restoreSendButton(); // Restaurar botón en caso de error
+                };
+            }
+
+            /**
+            *TODO: INICIALIZACION Y EVENTOS
+            */
+
+            function initEventListeners() {
+                // Eventos del formulario de comentarios
+                if (sendButton && commentInput) {
+                    sendButton.addEventListener('click', handleCommentSubmit);
+                    commentInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleCommentSubmit();
+                        }
+                    });
+                }
+
+                // Limpieza al salir de la página
+                window.addEventListener('beforeunload', function() {
+                    if (chatSocket) chatSocket.close(1000, 'Pagina Cerrada');
+                });
+            }
+
+            function initApplication() {
+                console.log("DOM COMPLETAMENTE CARGADO. EJECUTANDO SCRIPTS.");
+
+                // Verificar elemento crítico
+                if (!chatMessages) {
+                    console.error('Admin: Elemento crítico "ChatMessages" no encontrado. El chat no se puede inicializar.');
+                    return;
+                }
+
+                // Establecer la visibilidad inicial de los botones de acción
+                updateActionButtonVisibility("{{ ticket.id_estado|escapejs }}", "{{ ticket.asignado_a.username|default:''|escapejs }}");
+
+                // Inicializar componentes de UI
+                initPopupMessage(); 
+
+                // Verificación de superadmin
+                if (window.isCurrentUserSuperadmin) {
+                    console.log("Superadmin: Chat de ticket individual no se inicializa.");
+                    return; 
+                }
+
+                // Verificación de ticket cerrado
+                if (!window.ticketIsNotClosed) {
+                    console.log("Ticket cerrado: Funcionalidad de envío/chat deshabilitada.");
+                    if (commentInput) {
+                        commentInput.placeholder = "Este ticket ha sido cerrado.";
+                        commentInput.disabled = true;
+                    }
+                    if (sendButton) sendButton.disabled = true;
+                    if (adjuntoButton) adjuntoButton.disabled = true;
+                    return; 
+                }
+
+                // Verificar elementos del formulario
+                if (!commentForm || !commentInput || !sendButton) {
+                    console.error('Admin: Faltan elementos críticos del formulario de chat.');
+                    return;
+                }
+                
+                // Inicializar componentes
+                initAttachmentButton();
+                initEventListeners();
+
+                // Scroll inicial
+                setTimeout(() => {
+                    if (chatMessages) {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                }, 100);
+
+                // CORRECCIÓN: Lógica condicional simplificada
+                if (window.canAdminCommentGlobally && window.ticketIsNotClosed) {
+                    console.log('Admin: Inicializando WebSocket - Usuario puede comentar.');
+                    initWebSocket();
+                } else {
+                    console.log('Admin: No se inicializa WebSocket - Usuario no puede comentar o ticket cerrado.');
+                    if (commentInput) {
+                        commentInput.disabled = true;
+                        commentInput.placeholder = !window.canAdminCommentGlobally ? 
+                            'Debes tomar el ticket para responder.' : 
+                            'Este ticket ha sido cerrado.';
+                    }
+                    if (sendButton) sendButton.disabled = true;
+                    if (adjuntoButton) adjuntoButton.disabled = true;
+                }
+            }
+
+            // Inicializar aplicación
+            initApplication();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLVEX - Panel Superadministrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> <!-- Para exportar a Excel -->
+    <style>
+        /* ===== VARIABLES GLOBALES ==== */
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #e7f1ff;
+            --sidebar-width: 280px;
+            --min-app-width: 1024px;
+        }
+
+        /* ==== CONFIGURACIÓN GENERAL ==== */
+        html, body {
+            min-width: var(--min-app-width);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .logo-img {
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        /* ===== ESTRUCTURA PRINCIPAL DEL LAYOUT ==== */
+        .container-fluid {
+            min-width: var(--min-app-width);
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* ==== SIDEBAR NAVIGATION ==== */
+        .sidebar {
+            background: linear-gradient(325deg, #2a71fa, #000000);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1030;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar h5 {
+            padding: 10px 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            color: #ffffffcc;
+        }
+
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 6px 15px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* ==== CONTENIDO PRINCIPAL ==== */
+        .content-area {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 10px 25px;
+            min-width: calc(var(--min-app-width) - var(--sidebar-width));
+            background-color: #f8f9fa;
+        }
+
+        .main-header {
+            padding:15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .main-header h2 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .main-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        /* Tabla mejorada */
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border: none;
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+
+        .table td {
+            padding: 12px;
+            vertical-align: middle;
+            border-color: rgba(0,0,0,0.05);
+        }
+
+        .table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table a {
+            text-decoration: none;
+            font-weight: 500;
+            color: var(--primary-blue);
+            transition: color 0.2s;
+        }
+
+        .table a:hover {
+            color: var(--dark-blue);
+            text-decoration: underline;
+        }
+
+        /* Badges mejorados */
+        .badge {
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .badge.badge-abierto {
+            background: #2a71fa;
+            color: white;
+        }
+
+        .badge.badge-en-progreso {
+            background:rgb(255, 213, 0);
+            color: #343a40;
+        }
+
+        .badge.badge-cerrado {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+
+        .logout-button {
+            margin-top: auto;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            width: 100%;
+            margin: 30px auto 10px;
+            display: block;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
+
+        /* Estilos para la página de tickets */
+        .gestion-ticket {
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Cards de estadísticas mejoradas */
+        .stat-card {
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .card-header {
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 15px;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .stat-card .card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 3rem;
+            opacity: 0.8;
+            margin-right: 15px;
+        }
+
+        .stat-card .stat-count {
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .stat-card .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Gradientes para tarjetas estadísticas */
+        .card-abierto .card-header {
+            background: #2a71fa;
+        }
+
+        .card-en-progreso .card-header {
+            background: rgb(223, 184, 6);
+            color:rgb(64, 62, 52);
+        }
+        
+        .card-en-progreso .card-body {
+            background: linear-gradient(45deg, #f7971e20, #ffd20010);
+        }
+
+        .card-cerrado .card-header {
+            background: #1b8907;
+        }
+        
+        .card-cerrado .card-body {
+            background: linear-gradient(45deg,rgba(104, 136, 96, 0.13), #3f4c6b10);
+        }
+
+        /* Panel de informes */
+        .reports-panel {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .reports-panel .card-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .reports-panel .btn {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reports-panel .btn i {
+            font-size: 1.1rem;
+        }
+
+        /* Estilos responsive */
+        @media (max-width: 992px) {
+            .content-area {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-fluid p-0">
+    <div class="row g-0">
+
+        <!-- SIDEBAR -->
+        <div class="col-auto sidebar">
+            <div class="text-center mb-4 mt-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <img src="{% static 'images/SOLVEX_.png' %}" alt="Logo" style="max-width: 100%">
+                </div>
+            </div>
+
+            <div class="user-welcome py-2 px-3 mb-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                <h5 class="mt-2 mb-0">{{ superadmin_user.nombre }}</h5>
+                <p class="mb-0 text-white-50">Superadministrador</p>
+            </div>
+
+            <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>Menú Principal</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="{% url 'usuario:superadmin_dashboard' %}" class="nav-link">
+                        <i class="bi bi-speedometer2"></i>Dashboard
+                    </a>
+                </li>
+            </ul>
+
+            <h5><i class="bi bi-gear-fill me-2"></i>Administración</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="{% url 'usuario:reporte_superadmin' %}" class="nav-link active">
+                        <i class="bi bi-bar-chart"></i>Reportes
+                    </a>
+                </li>
+            </ul>
+
+            <!-- BOTON CERRAR SESION -->
+            <form action="{% url 'logout' %}" method="post" class="mt-auto">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">
+                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                </button>
+            </form>
+            <div class="div-footer text-lg-center ">
+                <p><strong>©Equipo desarrollo T.I. 2025</strong></p>
+            </div>
+        </div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="col content-area">
+            <!-- Encabezado de la página -->
+            <div class="main-header">
+                <div>
+                    <h2>Generar Reportes de Tickets</h2>
+                </div>
+            </div>
+            
+            <!-- Sección de mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Formulario de filtros -->
+            <form method="GET" action="{% url 'usuario:reporte_superadmin' %}" class="border p-4 rounded bg-light mb-4">
+                {# Campo oculto para indicar que queremos generar el PDF #}
+                <input type="hidden" name="generar_pdf" value="true">
+        
+                <h4>Filtros del Reporte</h4>
+        
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="fecha_inicio" class="form-label">Fecha Inicio:</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ request.GET.fecha_inicio }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_fin" class="form-label">Fecha Fin:</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ request.GET.fecha_fin }}">
+                    </div>
+                </div>
+        
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="area_agencia" class="form-label">Área/Agencia:</label>
+                        <select id="area_agencia" name="area_agencia" class="form-select">
+                            <option value="">-- Todas --</option>
+                            {% for area in area_agencia_choices %}
+                                <option value="{{ area }}" {% if request.GET.area_agencia == area %}selected{% endif %}>{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                     <div class="col-md-6">
+                        <label for="categoria" class="form-label">Categoría (Tipo Soporte):</label>
+                        <select id="categoria" name="categoria" class="form-select">
+                            <option value="">-- Todas --</option>
+                            {% for cat in categoria_choices %}
+                                <option value="{{ cat }}" {% if request.GET.categoria == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+        
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="motivo_cierre" class="form-label">Motivo de Cierre:</label>
+                        <select id="motivo_cierre" name="motivo_cierre" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for value, display in motivo_cierre_choices %}
+                                <option value="{{ value }}" {% if request.GET.motivo_cierre == value %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Aplica solo a tickets cerrados.</small>
+                    </div>
+                     <div class="col-md-6 align-self-end">
+                         <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="true" id="generar_grafico" name="generar_grafico" {% if request.GET.generar_grafico == 'true' %}checked{% endif %}>
+                            <label class="form-check-label" for="generar_grafico">
+                                Incluir Gráfico Mensual
+                            </label>
+                        </div>
+                    </div>
+                </div>
+        
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-file-pdf"></i> Generar Reporte PDF
+                </button>
+            </form>
+        </div> <!-- fin content-area -->
+    </div> <!-- fin row -->
+</div> <!-- fin container-fluid -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- JS para filtrar y exportar -->
+</body>
+</html>

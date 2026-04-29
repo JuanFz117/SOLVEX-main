@@ -1,0 +1,51 @@
+// CORRER SOLVEX
+daphne Mesa_de_Ayuda.asgi:application
+
+// INSTALACION DE SENGRID
+pip install sendgrid
+
+// EJECUTAR ENVIO DE PRUEBAS DE CORREOS:
+python manage.py enviar_recordatorios_test
+
+//! BORRAR LOS CONTENEDORES Y LIMPIARLOS
+docker-compose down --volumes --rmi all
+
+//? BASH 
+//? Construir y levantar todo en segundo plano
+docker-compose up -d --build
+
+//? Aplicar las migraciones a la nueva base de datos
+docker-compose exec web python manage.py migrate
+
+//? Crear tu superusuario
+docker-compose exec web python manage.py createsuperuser
+
+//! VALIDAR CONTENEDORES EN DOCKER
+docker ps
+
+//! Ir a la ruta del que se quiere eliminar:
+cd c:\.vscode\SOLVEX\
+
+//! BAJAR EL CONTENEDOR
+docker-compose down
+
+//! SUBIR EL CONTENEDOR EN SEGUNDO PLANO
+docker-compose up -d
+
+//! REALIZAR LA MIGRACION DE LA APLICACION USUARIO
+docker-compose exec web python manage.py makemigrations usuario
+
+//! REALIZAR LA MIGRACION DE LA APLICACION TICKETS
+docker-compose exec web python manage.py makemigrations tickets
+
+//! REALIZAR MIGRACIONES CREANDO LAS TABLAS
+docker-compose exec web python manage.py migrate
+
+//! CREAR EL SUPERUSUARIO
+docker-compose exec web python manage.py createsuperuser
+
+//! ACCEDER AL BASH
+docker-compose exec web bash
+
+//! SALIR DEL BASH
+exit

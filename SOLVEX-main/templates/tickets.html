@@ -1,0 +1,475 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpDesk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        /* ===== VARIABLES GLOBALES ==== */
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #e7f1ff;
+            --sidebar-width: 280px;
+            --min-app-width: 1024px; /* Ancho mínimo recomendado */
+        }
+        /* ==== CONFIGURACIÓN GENERAL ==== */
+        html, body {
+            min-width: var(--min-app-width); /* Establecer ancho mínimo */
+            overflow-x: hidden; /* Ocultar scroll horizontal */
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            height: 100%;
+        }
+
+        .logo-img {
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+        }
+        /* ===== ESTRUCTURA PRINCIPAL DEL LAYOUT ==== */
+        .container-fluid {
+            min-width: var(--min-app-width); /* Reforzar el ancho mínimo */
+            padding-left: 0;
+            padding-right: 0;
+        }
+        /* ==== SIDEBAR NAVIGATION ==== */
+        .sidebar {
+            background: linear-gradient(325deg, #2a71fa, #000000);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1030;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar h5 {
+            padding: 10px 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            color: #ffffffcc;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 6px 15px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        /* ==== CONTENIDO PRINCIPAL ==== */
+        .content-area {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 20px;
+            min-width: calc(var(--min-app-width) - var(--sidebar-width)); /* Ancho mínimo para el contenido */
+        }
+
+        .header {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,.05);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        .table {
+            background-color: white;
+        }
+
+        .table th {
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+        }
+
+        .pagination .page-link {
+            color: var(--primary-blue);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .logout-button {
+            margin-top: auto;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            width: 100%;
+            margin: 30px auto 10px;
+            display: block;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
+        
+        /* Estilos para la página de tickets */
+        .gestion-ticket {
+            padding: 1.5rem;
+        }
+        
+        .gestion-ticket header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .detalle-ticket {
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        }
+        /* Badges mejorados */
+        .badge {
+            {% comment %} padding: 8px 12px; {% endcomment %}
+            font-weight: 500;
+            {% comment %} letter-spacing: 0.5px; {% endcomment %}
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .badge.badge-cerrado {
+            background:rgb(16, 116, 0);
+            color: white;
+            font-size: 14px;
+            padding: 8px 12px;
+        }
+        
+        .card-resolved {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+        .sort-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .sort-button svg {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        
+        .sort-button:hover svg {
+            opacity: 1;
+        }
+
+        textarea {
+            resize: none;
+            max-height: 80px;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1040;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+        }
+        
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        /* ==== RESPONSIVE PARA PANTALLAS GRANDES ==== */
+        @media (max-width: var(--min-app-width)) {
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 9999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            body::after {
+                content: "Esta aplicación requiere una ventana de al menos 1024px de ancho";
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 1.2rem;
+                text-align: center;
+                z-index: 10000;
+                width: 80%;
+                max-width: 500px;
+            }
+        }
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        {% comment %} <div class="text-center">
+            <img src="{% static 'images/Trazo.png' %}" alt="Logo" class="logo-img">
+        </div> {% endcomment %}
+        <div class="text-center mb-4 mt-4">
+            <div class="d-flex align-items-center justify-content-center">
+                <img src="{% static 'images/SOLVEX_.png' %}" alt="Logo" style="max-width: 100%">
+            </div>
+        </div>
+        <div class="user-welcome py-2 px-3 mb-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+            <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+            <h5 class="mt-2 mb-0">Bienvenid@ {{ colaborador.nombre }}</h5>
+        </div>
+        <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>Menú Principal</h5>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="{% url 'tickets:index' %}" class="nav-link">
+                    <i class="bi bi-ticket me-2"></i>Creación de Tickets
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'tickets:tickets_resueltos' %}" class="nav-link active">
+                    <i class="bi bi-check-circle me-2"></i>Tickets Resueltos
+                </a>
+            </li>
+        </ul>
+        
+        <h5><i class="bi bi-gear-fill me-2"></i>Administración</h5>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="{% url 'usuario:cambiar_contrasena' %}" class="nav-link">
+                    <i class="bi bi-person me-2"></i>Cambiar Contraseña
+                </a>
+            </li>
+        </ul>
+        
+        <form action="{% url 'logout' %}" method="post" class="mt-auto">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">
+                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+            </button>
+        </form>
+        <div class="div-footer text-lg-center ">
+            <p><strong>©Equipo desarrollo T.I. 2025</strong></p>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->    
+    <div class="content-area">
+        <div class="card">
+            <div class="card-header">
+                Tickets Resueltos
+            </div>
+            <div class="detalle-ticket">
+                <!-- BARRA DE BÚSQUEDA -->
+                <div class="mb-4 position-relative">
+                    <input type="text" id="searchInput" placeholder="Buscar Ticket..."
+                           class="form-control form-control-lg ps-4 pe-5">
+                    <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-3 text-muted" style="font-size: 1.2rem;"></i>
+                </div>
+                
+                <!-- TABLA DE TICKETS -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                {% for value2 in tickets_generales2 %}
+                                <th>
+                                    <span class="d-flex align-items-center text-primary" data-field="{{ value2 }}">
+                                        {{ value2 }}
+                                    </span>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody id="ticketTableBody">
+                            {% for ticket2 in posts2 %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'tickets:ticket_detalle' ticket2.id %}" class="text-primary text-decoration-none">{{ ticket2.id }}</a>
+                                    </td>
+                                    <td>{{ ticket2.motivo }}</td>
+                                    <td>{{ ticket2.tipo_soporte }}</td>
+                                    <td>
+                                        <span class="badge rounded-pill
+                                            {% if ticket2.get_id_estado_display == 'Cerrado' %}badge-cerrado
+                                            {% else %}bg-primary{% endif %}">
+                                            {% if ticket2.id_estado == 'cerrado' %}
+                                                <i class="bi bi-check-circle me-1"></i>
+                                            {% endif %}
+                                            {{ ticket2.get_id_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ ticket2.fecha_creacion }}</td>
+                                    <td>{{ ticket2.fecha_cierre }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    
+                    <!-- PAGINACIÓN -->
+                    <nav aria-label="Paginación de tickets" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if posts2.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="Primera">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                    <span class="visually-hidden">Primera</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ posts2.previous_page_number }}" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="visually-hidden">Anterior</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;&laquo;</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;</span>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item">
+                                <span class="page-link bg-transparent text-primary">
+                                    Página {{ posts2.number }} de {{ posts2.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if posts2.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ posts2.next_page_number }}" aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="visually-hidden">Siguiente</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ posts2.paginator.num_pages }}" aria-label="Última">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                    <span class="visually-hidden">Última</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;&raquo;</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SCRIPT PARA LA BUSQUEDA DE LA TABLA
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const tableRows = document.querySelectorAll('#ticketTableBody tr');
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                tableRows.forEach(row => {
+                    let found = false;
+                    const cells = row.querySelectorAll('td');
+                    
+                    cells.forEach(cell => {
+                        if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                            found = true;
+                        }
+                    });
+                    
+                    if (found) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+username,password,email,rol,id_usuario,nombre,cargo,area_agencia
+maria.bermudez,password.,coordinador.garantias@congente.coop,colaborador,1121848138,BERMUDEZ JAIMES MARIA ANGELICA,COORDINADOR DE GARANTIAS,ADMINISTRATIVA
+claudia.velandia,password.,subdirector.vistahermosa@congente.coop,colaborador,52330215,VELANDIA CUERVO CLAUDIA SAY,ASESOR OPERATIVO,VISTAHERMOSA
+eva.molina,password.,cajero-01.cabuyaro@congente.coop,colaborador,1121959290,MOLINA DURAN EVA MELISSA,SUPERNUMERARIO,CABUYARO
+ana.duarte,password.,cajero-01.montecarlo@congente.coop,colaborador,40328201,DUARTE GUIZA ANA BERTILDE,CAJERO,MONTECARLO
+william.neira,password.,cajero-02.principal@congente.coop,colaborador,86061877,NEIRA GOMEZ WILLIAM FERNEY,CAJERO,PRINCIPAL
+duan.clavijo,password.,cajero-01.porfia@congente.coop,colaborador,1121847267,CLAVIJO QUEVEDO DUAN ALEXIS,CAJERO,PORFIA
+yesenia.zamora,password.,director.catama@congente.coop,colaborador,1113038249,ZAMORA QUINTERO YESENIA,DIRECTOR DE AGENCIA,CATAMA
+diesmy.correa,password.,director.granada@congente.coop,colaborador,40362555,CORREA LEGUIZAMON DIESMY LILIANA,DIRECTOR DE AGENCIA,GRANADA
+cristhian.rodriguez,password.,director.porfia@congente.coop,colaborador,1121871964,RODRIGUEZ GUERRERO CRISTHIAN MAURICIO,DIRECTOR DE AGENCIA,PORFIA
+carlos.molina,password.,director.popular@congente.coop,colaborador,17344545,MOLINA LOPEZ CARLOS ALBERTO,DIRECTOR DE AGENCIA,POPULAR
+inelda.velasquez,password.,director.guayabetal@congente.coop,colaborador,20855586,VELASQUEZ CRUZ INELDA MARIA,DIRECTOR DE AGENCIA,GUAYABETAL
+alba.santofimio,password.,director.barranca@congente.coop,colaborador,30518145,SANTOFIMIO GOMEZ ALBA NELLY,DIRECTOR DE AGENCIA,BARRANCA DE UPIA
+monica.gallo,password.,director.principal@congente.coop,colaborador,53159518,GALLO QUINTERO MONICA ALEXANDRA,DIRECTOR DE AGENCIA,PRINCIPAL
+yinssy.godoy,password.,subdirector.granada@congente.coop,colaborador,40306372,GODOY TOLOZA YINSSY LISETDI,ASESOR OPERATIVO,GRANADA
+hector.trujillo,password.,ase.externo-01.guayabetal@congente.coop,colaborador,1003649580,TRUJILLO GARCIA HECTOR FERNANDO,ASESOR MICROFINANZAS,GUAYABETAL
+angie.moreno,password.,cajero-01.catama@congente.coop,colaborador,1121965866,MORENO FERNANDEZ ANGIE VALENTINA,CAJERO,CATAMA
+karen.amaya,password.,gestor.cobro-01@congente.coop,colaborador,1121886603,AMAYA NAVARRO KAREN JULIETH,GESTOR DE COBRANZA,ADMINISTRATIVA
+alberto.lopez,password.,ase.externo-01.yopal@congente.coop,colaborador,1118549260,LOPEZ CARLOS ALBERTO,ASESOR MICROFINANZAS,YOPAL
+cristian.matoma,password.,ase.externo-01.popular@congente.coop,colaborador,1006771855,MATOMA BUSTAMANTE CRISTIAN CAMILO,ASESOR MICROFINANZAS,POPULAR
+linda.rodriguez,password.,ase.externo-01.puertolleras@congente.coop,colaborador,1006093280,RODRIGUEZ LOAIZA LINDA JULIETH,ASESOR MICROFINANZAS,PUERTO LLERAS
+jehison.pedroza,password.,ase.externo-01.lejanias@congente.coop,colaborador,1120356290,PEDROZA BARRAGAN JEHISON FERNEY,ASESOR MICROFINANZAS,LEJANIAS
+ingrid.restrepo,password.,ase.externo-01.catama@congente.coop,colaborador,1049608346,RESTREPO QUINTANA INGRID NATALIA,ASESOR MICROFINANZAS,CATAMA
+karin.ovalle,password.,ase.externo-02.principal@congente.coop,colaborador,1121908022,OVALLE BASTIDAS KARIN ALEJANDRA,ASESOR MICROFINANZAS,PRINCIPAL
+jafet.mora,password.,analista.infraestructura-ti@congente.coop,colaborador,1026281576,MORA LOPEZ JAFET ANDRES,ANALISTA INFRAESTRUCTURA T.I,ADMINISTRATIVA
+tulia.rodriguez,password.,lider.comunicaciones@congente.coop,colaborador,40402105,RODRIGUEZ IRIARTE TULIA AMPARO,LIDER DE RELACIONES Y COMUNICACIONES,ADMINISTRATIVA
+dania.rondon,password.,aux.gest.documental-04@congente.coop,colaborador,1121951391,RONDON ALMARIO DANIA YULISA,AUXILIAR GESTION DOCUMENTAL,POPULAR
+carmen.campos,password.,analista.credito-04@congente.coop,colaborador,40215461,CAMPOS BONILLA CARMEN YAMILE,ANALISTA DE CREDITO,ADMINISTRATIVA
+cristihan.carrillo,password.,analista.formacion-desarrollo@congente.coop,colaborador,1006825692,CARRILLO BARRERA CRISTIHAN CAMILO,ANALISTA DE FORMACION Y DESARROLLO,ADMINISTRATIVA
+angie.rubiano,password.,cajero-01.acacias@congente.coop,colaborador,1012354059,RUBIANO GARZON ANGIE NHATALY,CAJERO,ACACIAS
+maricela.lotero,password.,ase.comercial-01.mesetas@congente.coop,colaborador,65813565,LOTERO BETANCOURTH MARICELA,ASESOR COMERCIAL,MESETAS
+giovanny.palacios,password.,director.ti@congente.coop,colaborador,86080032,PALACIOS CUARTAS GIOVANNY ANDRES,DIRECTOR DE INGENIERIA T.I,ADMINISTRATIVA
+yuly.amaya,password.,convenios@congente.coop,colaborador,1121898218,AMAYA BURGOS YULY PAOLA,ANALISTA OPERATIVO CONVENIOS,ADMINISTRATIVA
+steven.castillo,password.,coord.gestion.documental@congente.coop,colaborador,1121895832,CASTILLO PEREZ STEVEN,COORDINADOR GESTION DOCUMENTAL,ADMINISTRATIVA
+patricia.veloza,password.,servicioalasociado@congente.coop,colaborador,1121816877,VELOZA ADRIANA PATRICIA,ANALISTA DE SERVICIO AL ASOCIADO,ADMINISTRATIVA
+kevin.ruiz,password.,analista.procesos@congente.coop,colaborador,1006797855,RUIZ VALERO KEVIN ESTEBAN,ANALISTA OPERATIVO DE PROCESOS,ADMINISTRATIVA
+maria.rodriguez,password.,aux.gest.documental-03@congente.coop,colaborador,40390032,RODRIGUEZ HERRERA MARIA EUGENIA,AUXILIAR GESTION DOCUMENTAL,POPULAR
+andrea.ramirez,password.,aux.gest.documental-02@congente.coop,colaborador,1121839609,RAMIREZ QUILCUE ANDREA BIBIANA,AUXILIAR GESTION DOCUMENTAL,POPULAR
+samir.barragan,password.,ase.externo-01.puertolopez@congente.coop,colaborador,1120870426,BARRAGAN RAMIREZ SAMIR YESID,ASESOR MICROFINANZAS,PUERTO LOPEZ
+blanca.henao,password.,ase.externo-01.granada@congente.coop,colaborador,40449584,HENAO MARIN BLANCA DEYSI,ASESOR MICROFINANZAS,GRANADA
+yulith.silva,password.,subdirector.montecarlo@congente.coop,colaborador,1121835334,SILVA PAEZ YULITH ANDREA,ASESOR OPERATIVO,MONTECARLO
+brenda.gordillo,password.,subdirector.catama@congente.coop,colaborador,1121911450,GORDILLO REYES BRENDA DAMARIS,ASESOR OPERATIVO,CATAMA
+luz.pulido,password.,subdirector.porfia@congente.coop,colaborador,40188354,PULIDO NARANJO LUZ MARY,ASESOR OPERATIVO,PORFIA
+luz.gonzalez,password.,asistente.gerencia@congente.coop,colaborador,1121828140,GONZALEZ TORRES LUZ HELENA,ASISTENTE DE GERENCIA,ADMINISTRATIVA
+leydi.riveros,password.,subdirector.principal@congente.coop,colaborador,1121840544,RIVEROS VANEGAS LEYDI ROCIO,ASESOR OPERATIVO,PRINCIPAL
+consuelo.prieto,password.,aprendiz.comercial@congente.coop,colaborador,40391191,PRIETO LINARES CONSUELO,ASESOR OPERATIVO,ADMINISTRATIVA
+ingrid.rodriguez,password.,auxiliar.credito-01@congente.coop,colaborador,1121940937,RODRIGUEZ CONTRERAS INGRID TATIANA,AUXILIAR DE CREDITO,ADMINISTRATIVA
+rocio.avellaneda,password.,gerente.general@congente.coop,colaborador,40437210,AVELLANEDA RINCON ROCIO DEL PILAR,GERENTE GENERAL,ADMINISTRATIVA
+jeimy.ruiz,password.,aprendiz.contable@congente.coop,colaborador,1119894379,RUIZ TORRES JEIMY JOHANNA,APRENDIZ SENA ETAPA PRUDUCTIVA,ADMINISTRATIVA
+jency.luna,password.,pendiente@congente.coop,colaborador,1123802520,LUNA MANRIQUE JENCY DAYANA,APRENDIZ SENA ETAPA PRUDUCTIVA,ADMINISTRATIVA
+yanyra.trujillo,password.,cajero-01.guayabetal@congente.coop,colaborador,40441780,TRUJILLO PARDO YANYRA LISETH,CAJERO,GUAYABETAL
+duban.lozano,password.,analista.contable-02@congente.coop,colaborador,1121948786,LOZANO MOJICA DUBAN FELIPE,ANALISTA CONTABLE,ADMINISTRATIVA
+heidy.angarita,password.,correspondencia@congente.coop,colaborador,1121834339,ANGARITA ACOSTA HEIDY VALENTINA,RECEPCIONISTA,ADMINISTRATIVA
+nidia.rodas,password.,analista.credito-03@congente.coop,colaborador,40329934,RODAS PEREZ NIDIA,ANALISTA DE CREDITO,ADMINISTRATIVA
+lizeth.lombo,password.,contador@congente.coop,colaborador,1121878449,LOMBO ACHURY LIZETH MARCELA,DIRECTOR FINANCIERO,ADMINISTRATIVA
+aydee.ruiz,password.,director.cabuyaro@congente.coop,colaborador,1121877546,RUIZ MALDONADO AYDEE ALEJANDRA,DIRECTOR DE AGENCIA,CABUYARO
+jorge.gaitan,password.,lider.talento-humano@congente.coop,colaborador,1121829117,GAITAN BOHORQUEZ JORGE ANDRES,LIDER TALENTO HUMANO,ADMINISTRATIVA
+yeny.gonzalez,password.,analista.desembolsos@congente.coop,colaborador,39670518,GONZALEZ VELANDIA YENY,ANALISTA DE DESEMBOLSOS,ADMINISTRATIVA
+maryury.santos,password.,analista.controltransaccional@congente.coop,colaborador,1121922848,SANTOS BERNAL MARYURY VANESSA DEL PILAR,ANALISTA DE CONTROL TRANSACCIONAL,ADMINISTRATIVA
+derli.torres,password., auxiliar.credito-04@congente.coop,colaborador,1121944353,TORRES ARAGON DERLI JOHANA,AUXILIAR DE CREDITO,ADMINISTRATIVA
+luz.mendoza,password.,ase.externo-01.puertorico@congente.coop,colaborador,40266402,MENDOZA RAMIREZ LUZ ARGENIS,ASESOR MICROFINANZAS,PUERTO RICO
+maria.amador,password.,ase.comercial-01.villanueva@congente.coop,colaborador,39951195,AMADOR VARGAS MARIA ALEXANDRA,ASESOR COMERCIAL,VILLANUEVA
+edgar.rondon,password.,ase.comercial-01.puertolopez@congente.coop,colaborador,1120866551,RONDON ACERO EDGAR ALEXANDER,ASESOR COMERCIAL,PUERTO LOPEZ
+yina.ariza,password.,ase.comercial-01.cumaral@congente.coop,colaborador,1119888807,ARIZA GARCIA YINA PAOLA,ASESOR COMERCIAL,CUMARAL
+pablo.aranguren,password.,adm.db@congente.coop,colaborador,86048885,ARANGUREN VALENCIA PABLO ENRIQUE,LIDER INFRAESTRUCTURA T.I,ADMINISTRATIVA
+vivi.manrique,password.,ase.externo-02.uribe@congente.coop,colaborador,1121905644,MANRIQUE DIAZ VIVI JOHANA,ASESOR MICROFINANZAS,URIBE
+diana.yela,password.,ase.externo-02.acacias@congente.coop,colaborador,1075226030,YELA ARTEAGA DIANA PATRICIA,ASESOR MICROFINANZAS,ACACIAS
+wilman.torres,password.,ase.externo-02.vistahermosa@congente.coop,colaborador,11685423,TORRES CRUZ WILMAN,ASESOR MICROFINANZAS,VISTAHERMOSA
+ray.hernandez,password.,ase.externo-01.cabuyaro@congente.coop,colaborador,1121877674,HERNANDEZ DAZA RAY ESNEIDER,ASESOR MICROFINANZAS,CABUYARO
+indira.morales,password.,ase.comercial-01.castillo@congente.coop,colaborador,1121877385,MORALES CESPEDES INDIRA NATALIA,ASESOR MICROFINANZAS,EL CASTILLO
+yurely.garcia,password.,ase.externo-01.cumaral@congente.coop,colaborador,1119890562,GARCIA OLIVEROS YURELY MABITH,ASESOR MICROFINANZAS,CUMARAL
+laura.sorza,password.,ase.externo-01.castillo@congente.coop,colaborador,1123059440,SORZA ANGARITA LAURA LUCIA,ASESOR COMERCIAL,EL CASTILLO
+lucy.ladino,password.,ase.comercial-03.principal@congente.coop,colaborador,40432359,LADINO ROMERO LUCY HONEYDA,ASESOR COMERCIAL,PRINCIPAL
+maria.hernandez,password.,ase.comercial-01.popular@congente.coop,colaborador,1121958618,HERNANDEZ CALDERON MARIA FERNANDA,ASESOR COMERCIAL,POPULAR
+diana.cartagena,password.,ase.comercial-01.lejanias@congente.coop,colaborador,1105685368,CARTAGENA JIMENEZ DIANA MARCELA,ASESOR COMERCIAL,LEJANIAS
+angie.espinosa,password.,ase.comercial-01.puertolleras@congente.coop,colaborador,1123430700,ESPINOSA GALLEGO ANGIE CAROLINA,ASESOR COMERCIAL,PUERTO LLERAS
+angie.ramirez,password.,ase.comercial-02.principal@congente.coop,colaborador,1192773369,RAMIREZ CORDERO ANGIE PAOLA,ASESOR COMERCIAL,PRINCIPAL
+gina.calderon,password.,ase.comercial-01.principal@congente.coop,colaborador,40341131,CALDERON SUAREZ GINA ALESSANDRA,ASESOR COMERCIAL,PRINCIPAL
+sandra.troncoso,password.,consejo.administracion@congente.coop,colaborador,52040269,TRONCOSO CARRILLO SANDRA PATRICIA,ASISTENTE ADMINISTRATIVO,ADMINISTRATIVA
+adriana.castillo,password.,aprendiz.comercial-02@congente.coop,colaborador,41213958,CASTILLO YASMID ADRIANA,ASESOR COMERCIAL,ADMINISTRATIVA
+darly.chavez,password.,lider.operaciones@congente.coop,colaborador,1121880890,CHAVEZ ALVAREZ DARLY YISMENCY,LIDER DE OPERACIONES,ADMINISTRATIVA
+andres.jimenez,password.,lider.desarrollo-transformacion@congente.coop,colaborador,1075309000,JIMENEZ GARCIA ANDRES FERNANDO,ANALISTA DE INGENIERIA ORGANIZACIONAL,ADMINISTRATIVA
+sandra.gomez,password.,ase.comercial-01.montecarlo@congente.coop,colaborador,35263886,GOMEZ RODRIGUEZ SANDRA MILENA,ASESOR COMERCIAL,MONTECARLO
+esmeralda.olmos,password.,subdirector.popular@congente.coop,colaborador,35260566,OLMOS ORTIZ ESMERALDA,ASESOR OPERATIVO,POPULAR
+elsa.martinez,password.,subdirector.guayabetal@congente.coop,colaborador,20855749,MARTINEZ BAQUERO ELSA,ASESOR OPERATIVO,GUAYABETAL
+lopez.,password.,cajero-01.vistahermosa@congente.coop,colaborador,1123566026, MOGOLLON LOPEZ ANGIE LORENA,CAJERO,VISTAHERMOSA
+luz.gutierrez,password.,cajero-01.granada@congente.coop,colaborador,40449525,GUTIERREZ RODRIGUEZ LUZ YADITH,CAJERO,GRANADA
+nelson.ramirez,password.,gerente.comercial@congente.coop,colaborador,80384318,RAMIREZ CELIS NELSON,GERENTE COMERCIAL,ADMINISTRATIVA
+cristian.quintero,password.,analista.desarrolloti@congente.coop,colaborador,1006776484,QUINTERO PRADA CRISTIAN SAID,ANALISTA DE DESARROLLO T.I,ADMINISTRATIVA
+jorge.rodriguez,password.,cajero-01.principal@congente.coop,colaborador,17344724,RODRIGUEZ CASTRO JORGE ELIECER,CAJERO,PRINCIPAL
+lina.diaz,password.,ase.comercial-01.puertorico@congente.coop,colaborador,1121420102,DIAZ MARTINEZ LINA FERNANDA,ASESOR COMERCIAL,PUERTO RICO
+leidy.ruiz,password.,auxiliar.garantias@congente.coop,colaborador,1121842755,RUIZ ORTIZ LEIDY XIOMARA,AUXILIAR DE GARANTIAS,ADMINISTRATIVA
+nancy.romero,password.,director.credito-cartera@congente.coop,colaborador,40411313,ROMERO GUTIERREZ NANCY,DIRECTOR DE CREDITO Y CARTERA,ADMINISTRATIVA
+ardila.,password.,analista.contable-01@congente.coop,colaborador,1122654313, MONTEALEGRE ARDILA KEVIN ARTURO,ANALISTA CONTABLE,ADMINISTRATIVA
+mayerly.lopez,password.,analista.nomina@congente.coop,colaborador,1121891072,LOPEZ CONTRERAS MAYERLY,ANALISTA DE NOMINA,ADMINISTRATIVA
+karla.caicedo,password.,analista.cartera@congente.coop,colaborador,1090515215,CAICEDO VELANDIA KARLA EILEEN,ANALISTA DE CARTERA,ADMINISTRATIVA
+karol.bohorquez,password.,subdirector.gaitan@congente.coop,colaborador,1006794410,BOHORQUEZ GOMEZ KAROL LICETH,ASESOR OPERATIVO,PUERTO GAITAN
+magdalena.tibay,password.,cajero-01.popular@congente.coop,colaborador,40443033,TIBAY MALPICA MAGDALENA,CAJERO,POPULAR
+juan.rodriguez,password.,supernumerario1@congente.coop,colaborador,1010124054,RODRIGUEZ DUARTE JUAN DAVID,SUPERNUMERARIO,ADMINISTRATIVA
+brayan.valencia,password.,subdirector.acacias@congente.coop,colaborador,1084330189,VALENCIA CABALLERO BRAYAN ALEJANDRO,ASESOR OPERATIVO,ADMINISTRATIVA
+andres.moreno,password.,supernumerario2@congente.coop,colaborador,1193074884,MORENO ARAGON ANDRES JULIAN,SUPERNUMERARIO,ADMINISTRATIVA
+viviana.parra,password.,analista.pagaduria@congente.coop,colaborador,1121864336,PARRA PINTO VIVIANA MARCELA,ANALISTA DE PAGADURIA I,ADMINISTRATIVA
+nohora.acosta,password.,oficial.cumplimiento@congente.coop,colaborador,1121833196,ACOSTA CAICEDO NOHORA CRISTINA,OFICIAL DE CUMPLIMIENTO,ADMINISTRATIVA
+carlos.ortiz,password.,analista.soporte.tecnico@congente.coop,colaborador,1006442329,ORTIZ ANGEL CARLOS DANIEL,ANALISTA DE SOPORTE TECNICO,ADMINISTRATIVA
+gina.baquero,password.,gerente.innovacion-transformacion@congente.coop,colaborador,40411375,BAQUERO CALDERON GINA MARICELA,GERENTE DE INNOVACION Y TRANSFORMACION,ADMINISTRATIVA
+erika.marulanda,password.,analista.talento.humano@congente.coop,colaborador,1121930576,MARULANDA LEAL ERIKA JOHANA,ANALISTA TALENTO HUMANO,ADMINISTRATIVA
+leidy.arcila,password.,analista.administrativo-01@congente.coop,colaborador,1121962404,ARCILA CUESTA LEIDY VIVIANA,ANALISTA SERVICIOS ADMINISTRATIVOS,ADMINISTRATIVA
+castillo.lina,password., cajero-01.barranca@congente.coop,colaborador,1010144049,LINA FERNANDA CASTILLO VARGAS,CAJERO,BARRANCA DE UPIA
+jhon.velez,password.,cajero-01.barranca@congente.coop,colaborador,1121958185,VELEZ BARRERA JHON OSCAR,ANALISTA DE CANALES,ADMINISTRATIVA
+andrea.ramirez,password.,ase.externo-02.yopal@congente.coop,colaborador,46379141,RAMIREZ AVELLA ANDREA PATRICIA,ASESOR MICROFINANZAS,YOPAL
+andres.giraldo,password.,ase.externo-01.mesetas@congente.coop,colaborador,1006692289,GIRALDO RODRIGUEZ ANDRES FELIPE,ASESOR MICROFINANZAS,MESETAS
+karla.castro,password.,ase.externo-01.acacias@congente.coop,colaborador,1004246876,CASTRO PARRA KARLA STEFANIA,ASESOR MICROFINANZAS,ACACIAS
+yina.gualtero,password.,ase.externo-02.porfia@congente.coop,colaborador,1080180628,GUALTERO OVIEDO YINA PAOLA,ASESOR MICROFINANZAS,PORFIA
+diana.araujo,password.,subdirector.barranca@congente.coop,colaborador,1127391057,ARAUJO CASTA�EDA DIANA MIRLEY,ASESOR OPERATIVO,BARRANCA DE UPIA
+julian.gutierrez,password.,director.montecarlo@congente.coop,colaborador,1122129294,GUTIERREZ PE�A JULIAN ROLANDO,DIRECTOR DE AGENCIA,MONTECARLO
+brigitte.tello,password.,lider.soporte.tecnico@congente.coop,colaborador,40412062,TELLO PATI�O BRIGITTE HASBLEYDY,LIDER DE SOPORTE TECNICO,ADMINISTRATIVA
+silvia.santamaria,password.,cajero-01.gaitan@congente.coop,colaborador,1120505821,SANTAMARIA CALE�O SILVIA TATIANA,CAJERO,PUERTO GAITAN
+wilson.ni�o,password.,oficial.riesgos@congente.coop,colaborador,80770705,NI�O MONTA�EZ WILSON FERNANDO,OFICIAL DE RIESGOS,ADMINISTRATIVA
+laura.ni�o,password.,ase.comercial-01.yopal@congente.coop,colaborador,1002741258,NI�O GUTIERREZ LAURA DAYANA,ASESOR COMERCIAL,YOPAL
+diana.ca�on,password.,coordinador.credito@congente.coop,colaborador,1014180757,CA�ON MAHECHA DIANA MARCELA,COORDINADOR DE CREDITO,ADMINISTRATIVA
+orlando.cague�as,password., auxiliar.credito-03@congente.coop,colaborador,3277132,CAGUE�AS MOJICA ORLANDO,AUXILIAR DE CREDITO,ADMINISTRATIVA
+lendy.pati�o,password.,ase.externo-01.villanueva@congente.coop,colaborador,1118200342,PATI�O RUIZ LENDY FERNANDA,ASESOR MICROFINANZAS,VILLANUEVA
+luisa.fajardo,password.,aux.gest.documental-01@congente.coop,colaborador,1121908380,FAJARDO PI�EROS LUISA FERNANDA,AUXILIAR GESTION DOCUMENTAL,POPULAR
+lina.pedraza,password.,analista.controltransaccional-03@congente.coop,colaborador,1121902019,PEDRAZA DUE�AS LINA MARIA,ANALISTA DE CONTROL TRANSACCIONAL,ADMINISTRATIVA
+juan.ni�o,password.,ase.externo-01.porfia@congente.coop,colaborador,1007769732,NI�O ORTIZ JUAN DAVID,ASESOR MICROFINANZAS,PORFIA
+estefania.rey,password.,aux.operativo.cartera@congente.coop,colaborador,1012332037,REY DUE�AS ESTEFANIA,AUXILIAR DE CARTERA,ADMINISTRATIVA
+karen.rincon,password.,aprendiz.consultas@congente.coop,colaborador,1096700222,RINC�N MARTINEZ KAREN DAYANA,APRENDIZ SENA,ADMINISTRATIVA
+maira.pedraza,password.,coordinador.sst@congente.coop,colaborador,1122653834,PEDRAZA CUADRADO MAIRA TATIANA,COORDINADOR DE SEGURIDAD Y SALUD EN EL TRABAJO,ADMINISTRATIVA
+ricaurte.leidy,password.,ase.externo-01.gaitan@congente.coop,colaborador,1124830343,LEIDY CAROLINA RICAURTE OLIVO,ASESOR MICROFINANZAS,PUERTO GAITAN
+moreno.diego,password.,ase.externo-01.montecarlo@congente.coop,colaborador,1121926279,DIEGO ARMANDO MORENO PE�ARETE,ASESOR MICROFINANZAS,MONTECARLO
+ocampoo.nayely,password.,ase.comercial-02.granada@congente.coop,colaborador,1124244327,NAYELY HERNÁNDEZ OCAMPOO,ASESOR COMERCIAL,GRANADA
+carlos.mora,password.,lider.microfinanzas@congente.coop,colaborador,86063061,MORA CHISCO CARLOS ENRIQUE,L͍DER DE MICROFINANZAS,ADMINISTRATIVA
+cesar.chilito,password.,director.acacias@congente.coop,colaborador,86042454,CHILITO VARGAS C�SAR AUGUSTO,DIRECTOR DE AGENCIA,ACACIAS
+jerson.loaiza,password.,ase.externo-01.barranca@congente.coop,colaborador,1124192051,LOAIZA FIRIGUA JERSON CAMILO,ASESOR MICROFINANZAS,BARRANCA DE UPIA
+daniela.acevedo,password.,analista.credito-01@congente.coop,colaborador,1006771797,ACEVEDO DUQUE DANIELA YISED,ANALISTA DE CREDITO,ADMINISTRATIVA
+jhojan.vanegas,password.,ase.externo-01.vistahermosa@congente.coop,colaborador,1123560666,VANEGAS FORERO JHOJAN DAVID,ASESOR MICROFINANZAS,VISTAHERMOSA
+deisy.castro,password.,coordinador.cobranza@congente.coop,colaborador,1003649783,CASTRO REY DEISY YISELA,COORDINADOR COBRANZA,ADMINISTRATIVA

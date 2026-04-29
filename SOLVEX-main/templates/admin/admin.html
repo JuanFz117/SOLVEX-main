@@ -1,0 +1,925 @@
+{% load static %}
+<!-- 
+    SOLVEX HelpDesk - Detalle de Ticket
+    Vista diseñada específicamente para la interacción con un ticket particular,
+    incluyendo su historial de comunicaciones y opción para agregar comentarios.
+    
+    Diferencias con la vista de índice:
+    - Layout optimizado para conversación (tipo chat)
+    - Más espacio dedicado al contenido principal del ticket
+    - Formulario para agregar comentarios anclado en la parte inferior
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpDesk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        /* ===== VARIABLES GLOBALES ==== */
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #e7f1ff;
+            --sidebar-width: 280px;
+            --min-app-width: 1024px; /* Ancho mínimo recomendado */
+        }
+        /* ==== CONFIGURACIÓN GENERAL ==== */
+        html, body {
+            min-width: var(--min-app-width); /* Establecer ancho mínimo */
+            overflow-x: hidden; /* Ocultar scroll horizontal */
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            height: 100%;
+        }
+
+        .logo-img {
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+        }
+        /* ===== ESTRUCTURA PRINCIPAL DEL LAYOUT ==== */
+        .container-fluid {
+            min-width: var(--min-app-width); /* Reforzar el ancho mínimo */
+            padding-left: 0;
+            padding-right: 0;
+        }
+        /* ==== SIDEBAR NAVIGATION ==== */
+        .sidebar {
+            background: linear-gradient(325deg, #2a71fa, #000000);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1030;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar h5 {
+            padding: 10px 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            color: #ffffffcc;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 6px 15px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        /* ==== CONTENIDO PRINCIPAL ==== */
+        .content-area {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 20px 30px;
+            min-width: calc(var(--min-app-width) - var(--sidebar-width)); /* Ancho mínimo para el contenido */
+        }
+
+        .header {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,.05);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+        /* Badges mejorados */
+        .badge {
+            {% comment %} padding: 8px 12px; {% endcomment %}
+            font-weight: 500;
+            {% comment %} letter-spacing: 0.5px; {% endcomment %}
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .badge.badge-abierto {
+            background: #2a71fa;
+            color: white;
+        }
+
+        .badge.badge-en-progreso {
+            background:rgb(255, 213, 0);
+            color: #343a40;
+        }
+
+        .badge.badge-cerrado {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+        .table {
+            background-color: white;
+        }
+
+        .table th {
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+        }
+
+        .pagination .page-link {
+            color: var(--primary-blue);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .logout-button {
+            margin-top: auto;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            width: 100%;
+            margin: 30px auto 10px;
+            display: block;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
+        
+        /* Estilos para la página de tickets */
+        .gestion-ticket {
+            padding: 1.5rem;
+        }
+        
+        .gestion-ticket header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .detalle-ticket {
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        }
+        
+        .sort-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .sort-button svg {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        
+        .sort-button:hover svg {
+            opacity: 1;
+        }
+
+        textarea {
+            resize: none;
+            max-height: 80px;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1040;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+        }
+        
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        /* Estilos para las tarjetas de conteo */
+        .stat-card {
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card .card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        
+        .stat-card .stat-count {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+        
+        /* Colores para las tarjetas de estadísticas */
+        .card-pending {
+            background: linear-gradient(45deg, #ffc107, #ffda6a);
+            color: #212529;
+        }
+        
+        .card-open {
+            background: #2a71fa;
+            color: white;
+        }
+        
+        .card-progress {
+            background:rgb(255, 213, 0);
+            color: #343a40;
+        }
+        
+        .card-resolved {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+        
+        /* ==== RESPONSIVE PARA PANTALLAS GRANDES ==== */
+        @media (max-width: var(--min-app-width)) {
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 9999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            body::after {
+                content: "Esta aplicación requiere una ventana de al menos 1024px de ancho";
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 1.2rem;
+                text-align: center;
+                z-index: 10000;
+                width: 80%;
+                max-width: 500px;
+            }
+        }
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <div class="col-auto col-md-3 col-xl-2 sidebar">
+                <div class="text-center mb-4 mt-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <img src="{% static 'images/SOLVEX_.png' %}" alt="Logo" style="max-width: 100%">
+                    </div>
+                </div>
+                <div class="user-welcome py-2 px-3 mb-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-0">Bienvenid@ {{ admin_user.nombre }}</h5>
+                </div>
+                <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>Menú Principal</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:admin_dashboard' %}" class="nav-link active">
+                            <i class="bi bi-box"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:tickets_resueltos' %}" class="nav-link">
+                            <i class="bi bi-check-circle me-2"></i>Tickets Resueltos
+                        </a>
+                    </li>
+                </ul>
+                <h5><i class="bi bi-gear-fill me-2"></i>Administración</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:cambiar_contrasena' %}" class="nav-link">
+                            <i class="bi bi-person me-2"></i>Perfil
+                        </a>
+                    </li>
+                </ul>
+                <form action="{% url 'logout' %}" method="post" class="mt-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                    </button>
+                </form>
+                <div class="div-footer text-lg-center ">
+                    <p><strong>©Equipo desarrollo T.I. 2025</strong></p>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                {# --- POPUP PARA MENSAJES --- #}
+                <div id="popup-message" class="popup" style="display:none; position: fixed; top: 20px; right: 20px; background-color: #4CAF50; color: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 1050;">
+                    <span id="popup-message-text"></span>
+                    <button onclick="closePopup()" style="float: right; margin-left: 10px; background: none; border: none; color: white; font-weight: bold; cursor: pointer;">
+                        &times;
+                    </button>
+                </div>
+            
+                <script>
+                    function closePopup() {
+                        document.getElementById('popup-message').style.display = 'none';
+                    }
+                </script>
+                <h1 class="page-header mb-4">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard Administrador
+                </h1>
+                
+                <!-- Conteo de tickets - Nuevas tarjetas de estadísticas -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card card-open">
+                            <div class="card-body">
+                                <div>
+                                    <div class="stat-count" id="ticketsAbiertosCount">{{ tickets_abiertos_count }}</div>
+                                    <div class="stat-label">Abiertos</div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="bi bi-folder2-open"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card card-progress">
+                            <div class="card-body">
+                                <div>
+                                    <div class="stat-count" id="ticketsEnProgresoCount">{{ tickets_en_progreso_count }}</div>
+                                    <div class="stat-label">En Proceso</div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="bi bi-gear-wide-connected"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card card-resolved">
+                            <div class="card-body">
+                                <div>
+                                    <div class="stat-count" id="ticketsCerradoCount">{{ tickets_cerrado_count }}</div>
+                                    <div class="stat-label">Resueltos</div>
+                                </div>
+                                <div class="stat-icon">
+                                    <i class="bi bi-check2-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Tickets Activos (Abiertos)
+                    </div>
+                    <div class="card-body">
+                        <!-- BARRA DE BÚSQUEDA -->
+                        <div class="mb-2 position-relative">
+                            <input type="text" id="searchInput" placeholder="Buscar Ticket..."
+                                   class="form-control ps-4 pe-5">
+                            <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-3 text-muted"></i>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        {% for header in dashboard_headers %}
+                                        <th>{{ header }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketTableBody">
+                                    {% for ticket in page_obj %} {# <--- Bucle sobre los tickets de la página actual #}
+                                    <tr>
+                                        <td>
+                                            {# Enlace a la nueva vista de detalle para admin #}
+                                            <a href="{% url 'tickets:admin_ticket_detail' ticket.id %}" class="text-primary text-decoration-none fw-bold">
+                                                {{ ticket.id }}
+                                            </a>
+                                        </td>
+                                        <td>{{ ticket.motivo|truncatechars:40 }}</td> {# Trunca motivos largos #}
+                                        <td>{{ ticket.usuario.username }}</td>
+                                        <td>{{ ticket.tipo_soporte }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill 
+                                            {% if ticket.id_estado == 'abierto' %}badge-abierto
+                                            {% elif ticket.id_estado == 'en_progreso' %}badge-en-progreso
+                                            {% elif ticket.id_estado == 'cerrado' %}badge-cerrado
+                                            {% else %}bg-primary{% endif %}">
+                                                {% if ticket.id_estado == 'abierto' %}
+                                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                                {% elif ticket.id_estado == 'en_progreso' %}
+                                                    <i class="bi bi-hourglass-split me-1"></i>
+                                                {% elif ticket.id_estado == 'cerrado' %}
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                {% endif %}
+                                                {{ ticket.get_id_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if ticket.id_prioridad == 'alta' %}
+                                                <span class="text-danger">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Alta
+                                                </span>
+                                            {% elif ticket.id_prioridad == 'media' %}
+                                                <span class="text-warning">
+                                                    <i class="bi bi-dash-circle-fill me-1"></i>Media
+                                                </span>
+                                            {% elif ticket.id_prioridad == 'baja' %}
+                                                <span class="text-success">
+                                                    <i class="bi bi-arrow-down-circle-fill me-1"></i>Baja
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ ticket.fecha_creacion | date:"d/m/Y" }}, {{ ticket.fecha_creacion|time:"P" }}</td> {# Formato más corto #}
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="{{ dashboard_headers|length }}" class="text-center text-muted">No hay tickets activos ni pendientes.</td>
+                                    </tr>
+                                    {% endfor %} {# <--- FIN DEL BUCLE #}
+                                </tbody>
+                            </table>
+
+                            <!-- CUANDO LA LISTA SEA DEMASIADO LARGA AGREGAMOS PAGINACION -->
+
+                            <!-- PAGINACIÓN -->
+                            <nav aria-label="Paginación de tickets" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %} {# Usar page_obj #}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1" aria-label="Primera">
+                                            <span aria-hidden="true">&laquo;&laquo;</span>
+                                            <span class="visually-hidden">Primera</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item"> {# Usar page_obj #}
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                            <span aria-hidden="true">&laquo;</span>
+                                            <span class="visually-hidden">Anterior</span>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled"> {# Usar page_obj #}
+                                        <span class="page-link">&laquo;&laquo;</span>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&laquo;</span>
+                                    </li>
+                                    {% endif %}
+
+                                    <li class="page-item">
+                                        <span class="page-link bg-transparent text-primary"> {# Usar page_obj #}
+                                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %} {# Usar page_obj #}
+                                    <li class="page-item"> {# Usar page_obj #}
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                            <span aria-hidden="true">&raquo;</span>
+                                            <span class="visually-hidden">Siguiente</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ posts2.paginator.num_pages }}" aria-label="Última">
+                                            <span aria-hidden="true">&raquo;&raquo;</span>
+                                            <span class="visually-hidden">Última</span>
+                                        </a>
+                                    </li>
+                                    {% else %} {# Usar page_obj #}
+                                    <li class="page-item disabled"> {# Usar page_obj #}
+                                        <span class="page-link">&raquo;</span>
+                                    </li> {# Usar page_obj #}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&raquo;&raquo;</span>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+         // ASIGNAR COMO PRIMERA INSTANCIA LAS VARIABLES GLOBALES
+        window.adminUserCategory = "{{ admin_user.categoria|default_if_none:''|escapejs }}";
+        window.isAdminUserSuperadmin = {{ es_superadmin|lower }};
+        // IMPRESIONES DE SEGUIMIENTO
+        console.log('Global window.adminUserCategory (definida):', window.adminUserCategory);
+        console.log('Global window.isAdminUserSuperadmin (definida):', window.isAdminUserSuperadmin);
+        /**
+        * TODO: DASHBOARD ADMINISTRATIVO - SCRIPT PRINCIPAL
+        */
+
+        function escapeHtml(text) {
+            if (typeof text === 'number') { // SI ES NUMERO LO CONVERTIMOS A string
+                text = String(text);
+            }
+            if (typeof text !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+        * TODO: FORMATEAR FECHAS
+        */
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+
+            // FORMATO DE FECHA (DD/MM/YYYY)
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // MES ES IGUAL A 0
+            const year = date.getFullYear();
+            const formattedDate = `${day}/${month}/${year}`;
+
+            // Time part (H:MM a.m./p.m.)
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'p.m.' : 'a.m.'; // USAR AM O PM
+            hours = hours % 12;
+            hours = hours ? hours : 12; // LAS 0 DEBEN SER LAS 12
+            const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+            // COMBINAR FECHA Y TIEMPO CON UNA COMA Y ESPACIO
+            return `${formattedDate}, ${formattedTime}`; // AÑADIR COMA Y ESPACIO
+        }
+
+        /**
+        * TODO: OBTENER LAS CLASES DE CSS
+        */
+        function getBadgeClass(estado) {
+            const badgeClasses = {
+                'abierto': 'badge-abierto',
+                'en_progreso': 'badge-en-progreso',
+                'cerrado': 'badge-cerrado'
+            };
+            return badgeClasses[estado] || 'bg-primary';
+        }
+
+        /**
+        * TODO: BARRA DE BUSQUEDA
+        */
+        function initializeTableSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const tableRows = document.querySelectorAll('#ticketTableBody tr');
+            
+            if (!searchInput || !tableRows.length) {
+                console.warn('Elementos de búsqueda no encontrados');
+                return;
+            }
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                tableRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const found = Array.from(cells).some(cell => 
+                        cell.textContent.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    row.style.display = found ? '' : 'none';
+                });
+            });
+            
+            console.log('Sistema de búsqueda inicializado correctamente');
+        }
+        
+        /**
+        * TODO: FUNCION PARA LOS POPUPS
+        */
+        function closePopup() {
+            const popup = document.getElementById('popup-message');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
+
+        function initializePopupMessages() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const successMessage = urlParams.get('success_message');
+
+            if (!successMessage) return;
+
+            const popup = document.getElementById('popup-message');
+            const popupText = document.getElementById('popup-message-text');
+            
+            if (popup && popupText) {
+                popupText.textContent = successMessage;
+                popup.style.display = 'block';
+                
+                // LIMPIAR LA URL
+                urlParams.delete('success_message');
+                const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
+                history.replaceState({}, '', newUrl);
+                
+                //CERRAR DESPUES DE 5 SEGUNDOS
+                setTimeout(closePopup, 5000);
+                
+                console.log('Mensaje popup mostrado:', successMessage);
+            }
+        }
+        
+        /**
+        * TODO: FUNCION WEBSOCKETS
+        */
+        
+        // ACTUALIZAR CONTADORES DE TICKETS
+        
+        function updateTicketCounters(ticketStatusValue, change = 1) {
+            const counterMapping = {
+                'abierto': 'ticketsAbiertosCount',
+                'en_progreso': 'ticketsEnProgresoCount',
+                'cerrado': 'ticketsCerradoCount'
+            };
+            
+            const countElementId = counterMapping[ticketStatusValue];
+            
+            if (!countElementId) {
+                console.warn('Estado de ticket no reconocido:', ticketStatusValue);
+                return;
+            }
+            
+            const countElement = document.getElementById(countElementId);
+            if (countElement) {
+                const currentCount = parseInt(countElement.textContent) || 0;
+                const newCount = Math.max(0, currentCount + change);
+                countElement.textContent = newCount;
+                console.log(`Contador ${countElementId} actualizado: ${currentCount} → ${newCount}`);
+            } else {
+                console.warn('Elemento contador no encontrado:', countElementId);
+            }
+        }
+
+        /**
+        * TODO: AGREGAR TICKET A LA TABLAS
+        */
+        function addTicketToTable(ticket) {
+            console.log('Ticket object in addTicketToTable:', ticket); // Para depurar el objeto ticket
+            const tableBody = document.getElementById('ticketTableBody');
+            if (!tableBody) {
+                console.warn('Tabla de tickets no encontrada');
+                return;
+            }
+            
+            // VALIDAR SI EL TICKET YA EXISTE
+            const existingRow = document.getElementById(`ticket-row-${ticket.id}`);
+            if (existingRow) {
+                console.log('Ticket ya existe en la tabla:', ticket.id);
+                return;
+            }
+            
+            const newRow = tableBody.insertRow(0); // INSERTAR EL TICKET AL INICIO DE LA TABLA
+            newRow.setAttribute('id', `ticket-row-${ticket.id}`);
+            
+            const badgeClass = getBadgeClass(ticket.estado_value);
+            let estadoIconHtml = '';
+            if (ticket.estado_value === 'abierto') {
+                estadoIconHtml = '<i class="bi bi-exclamation-circle me-1"></i>';
+            } else if (ticket.estado_value === 'en_progreso') {
+                estadoIconHtml = '<i class="bi bi-hourglass-split me-1"></i>';
+            } else if (ticket.estado_value === 'cerrado') {
+                estadoIconHtml = '<i class="bi bi-check-circle me-1"></i>';
+            }
+
+            let prioridadHtml = '';
+            // Asegúrate de que ticket.prioridad_value y ticket.prioridad_display lleguen del WebSocket
+            if (ticket.prioridad_value === 'alta') {
+                prioridadHtml = `<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>${escapeHtml(ticket.prioridad_display)}</span>`;
+            } else if (ticket.prioridad_value === 'media') {
+                prioridadHtml = `<span class="text-warning"><i class="bi bi-dash-circle-fill me-1"></i>${escapeHtml(ticket.prioridad_display)}</span>`;
+            } else if (ticket.prioridad_value === 'baja') {
+                prioridadHtml = `<span class="text-success"><i class="bi bi-arrow-down-circle-fill me-1"></i>${escapeHtml(ticket.prioridad_display)}</span>`;
+            } else {
+                prioridadHtml = `<span class="badge bg-secondary">N/A</span>`;
+            }
+            /**
+            * TODO: CONSTRUIR LA TABLAS
+            */
+            newRow.innerHTML = `
+                <td><a href="${escapeHtml(ticket.url_detalle_admin)}" class="text-primary text-decoration-none fw-bold">${ticket.id}</a></td>
+                <td>${escapeHtml(ticket.motivo)}</td>
+                <td>${escapeHtml(ticket.usuario_username)}</td>
+                <td>${escapeHtml(ticket.tipo_soporte)}</td>
+                <td>
+                    <span class="badge rounded-pill ${badgeClass}">
+                        ${estadoIconHtml}
+                        ${escapeHtml(ticket.estado_display)}
+                    </span>
+                </td>
+                <td>${prioridadHtml}</td>
+                <td>${formatDate(ticket.fecha_creacion)}</td>
+            `;
+            
+            // EFECTO VISUAL
+            newRow.style.backgroundColor = '#e7f1ff';
+            newRow.style.transition = 'background-color 0.5s ease';
+            
+            setTimeout(() => {
+                newRow.style.backgroundColor = '';
+            }, 5000);
+            
+            console.log('Nuevo ticket añadido a la tabla:', ticket.id);
+        }
+
+        /**
+        * TODO: MANEJO DE MENSAJES RECIBIDOS
+        */
+        function handleWebSocketMessage(data, adminUserCategory, isAdminUserSuperadmin) {
+            console.log('Mensaje recibido en Admin Dashboard:', data);
+            
+            if (data.type !== 'new_ticket') {
+                console.log('Tipo de mensaje no reconocido:', data.type);
+                return;
+            }
+            
+            const ticket = data.ticket;
+            
+            // VERIFICAR PERMISOS
+            const hasPermission = isAdminUserSuperadmin || ticket.tipo_soporte === adminUserCategory;
+            
+            if (hasPermission) {
+                console.log('Ticket pertenece a la categoría del admin o es superadmin. Procesando:', ticket.id);
+                addTicketToTable(ticket);
+                updateTicketCounters(ticket.estado_value, 1);
+            } else {
+                console.log(`Ticket ${ticket.id} no pertenece a la categoría ${adminUserCategory} del admin. Ignorando...`);
+            }
+        }
+
+        /**
+        * TODO: INCIAR CONEXIÓN
+        */
+        function initializeWebSocket() {
+            // OBTENER DATOS - Con fallbacks y validación
+            const adminUserCategory = window.adminUserCategory || '';
+            const isAdminUserSuperadmin = window.isAdminUserSuperadmin || false;
+            
+            console.log('initializeWebSocket - Admin Categoría:', adminUserCategory);
+            console.log('initializeWebSocket - Es Superadmin:', isAdminUserSuperadmin);
+            
+            // Validación adicional
+            if (!adminUserCategory && !isAdminUserSuperadmin) {
+                console.error('No se pudo obtener la categoría del admin ni el estado de superadmin');
+                return;
+            }
+            
+            // Construir URL del WebSocket
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socketURL = `${protocol}//${window.location.host}/ws/admin_dashboard/`;
+            
+            const adminDashboardSocket = new WebSocket(socketURL);
+            
+            adminDashboardSocket.onopen = function(event) {
+                console.log('Admin Dashboard WebSocket conectado exitosamente');
+                console.log('Configuración activa - Categoría:', adminUserCategory, 'Superadmin:', isAdminUserSuperadmin);
+            };
+            
+            adminDashboardSocket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Datos parseados del WebSocket:', data);
+                    handleWebSocketMessage(data, adminUserCategory, isAdminUserSuperadmin);
+                } catch (error) {
+                    console.error('Error al procesar mensaje WebSocket:', error);
+                }
+            };
+            
+            adminDashboardSocket.onclose = function(event) {
+                console.log('Admin Dashboard WebSocket cerrado. Código:', event.code, 'Razón:', event.reason);
+                
+                // INTENTAR RECONECTAR DESPUÉS DE 3 SEGUNDOS
+                setTimeout(() => {
+                    console.log('Intentando reconectar WebSocket...');
+                    initializeWebSocket();
+                }, 3000);
+            };
+            
+            adminDashboardSocket.onerror = function(error) {
+                console.error('Error en Admin Dashboard WebSocket:', error);
+            };
+            
+            // Guardar referencia global para debugging
+            window.adminDashboardSocket = adminDashboardSocket;
+        }
+
+        /**
+        * TODO: INCIAR TODAS LAS FUNCIONES
+        */
+        function initializeDashboard() {
+            console.log('Inicializando Dashboard Administrativo...');
+            
+            // Inicializar componentes
+            initializeTableSearch();
+            initializePopupMessages();
+            initializeWebSocket();
+            
+            console.log('Dashboard Administrativo inicializado correctamente');
+        }
+
+        // Inicializar cuando el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // Exponer funciones globales para uso desde templates Django
+        window.closePopup = closePopup;
+        window.updateTicketCounters = updateTicketCounters;
+    </script>
+</body>
+</html>

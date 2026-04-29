@@ -1,0 +1,661 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLVEX - Panel Superadministrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        /* ===== VARIABLES GLOBALES ==== */
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #e7f1ff;
+            --sidebar-width: 280px;
+            --min-app-width: 1024px;
+        }
+
+        /* ==== CONFIGURACIÓN GENERAL ==== */
+        html, body {
+            min-width: var(--min-app-width);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .logo-img {
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        /* ===== ESTRUCTURA PRINCIPAL DEL LAYOUT ==== */
+        .container-fluid {
+            min-width: var(--min-app-width);
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* ==== SIDEBAR NAVIGATION ==== */
+        .sidebar {
+            background: linear-gradient(325deg, #2a71fa, #000000);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1030;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar h5 {
+            padding: 10px 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            color: #ffffffcc;
+        }
+
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 6px 15px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* ==== CONTENIDO PRINCIPAL ==== */
+        .content-area {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 10px 25px;
+            min-width: calc(var(--min-app-width) - var(--sidebar-width));
+            background-color: #f8f9fa;
+        }
+
+        .main-header {
+            padding:15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .main-header h2 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .main-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            {% comment %} margin-bottom: 25px; {% endcomment %}
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+
+        {% comment %} .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        } {% endcomment %}
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        /* Tabla mejorada */
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border: none;
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+
+        .table td {
+            padding: 12px;
+            vertical-align: middle;
+            border-color: rgba(0,0,0,0.05);
+        }
+
+        .table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table a {
+            text-decoration: none;
+            font-weight: 500;
+            color: var(--primary-blue);
+            transition: color 0.2s;
+        }
+
+        .table a:hover {
+            color: var(--dark-blue);
+            text-decoration: underline;
+        }
+
+        /* Badges mejorados */
+        .badge {
+            {% comment %} padding: 8px 12px; {% endcomment %}
+            font-weight: 500;
+            {% comment %} letter-spacing: 0.5px; {% endcomment %}
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .badge.badge-abierto {
+            background: #2a71fa;
+            color: white;
+        }
+
+        .badge.badge-en-progreso {
+            background:rgb(255, 213, 0);
+            color: #343a40;
+        }
+
+        .badge.badge-cerrado {
+            background:rgb(16, 116, 0);
+            color: white;
+        }
+
+        .logout-button {
+            margin-top: auto;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            width: 100%;
+            margin: 30px auto 10px;
+            display: block;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
+
+        /* Estilos para la página de tickets */
+        .gestion-ticket {
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Cards de estadísticas mejoradas */
+        .stat-card {
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .card-header {
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 15px;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .stat-card .card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 3rem;
+            opacity: 0.8;
+            margin-right: 15px;
+        }
+
+        .stat-card .stat-count {
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .stat-card .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Gradientes para tarjetas estadísticas */
+        .card-abierto .card-header {
+            background: #2a71fa;
+        }
+        
+        {% comment %} .card-abierto .card-header {
+            background-color: var(--primary-blue);
+        } {% endcomment %}
+
+        .card-en-progreso .card-header {
+            background: rgb(223, 184, 6);
+            color:rgb(64, 62, 52);
+        }
+        
+        .card-en-progreso .card-body {
+            background: linear-gradient(45deg, #f7971e20, #ffd20010);
+        }
+
+        .card-cerrado .card-header {
+            background: #1b8907;
+        }
+        
+        .card-cerrado .card-body {
+            background: linear-gradient(45deg,rgba(104, 136, 96, 0.13), #3f4c6b10);
+        }
+
+        /* Panel de informes */
+        .reports-panel {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .reports-panel .card-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .reports-panel .btn {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reports-panel .btn i {
+            font-size: 1.1rem;
+        }
+
+        /* Estilos responsive */
+        @media (max-width: 992px) {
+            .content-area {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- SIDEBAR -->
+            <div class="col-auto sidebar">
+                <div class="text-center mb-4 mt-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <img src="{% static 'images/SOLVEX_.png' %}" alt="Logo" style="max-width: 100%">
+                    </div>
+                </div>
+
+                <div class="user-welcome py-2 px-3 mb-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-0">{{ superadmin_user.nombre }}</h5>
+                    <p class="mb-0 text-white-50">Superadministrador</p>
+                </div>
+
+                <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>Menú Principal</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:superadmin_dashboard' %}" class="nav-link active">
+                            <i class="bi bi-speedometer2"></i>Dashboard
+                        </a>
+                    </li>
+                </ul>
+
+                <h5><i class="bi bi-gear-fill me-2"></i>Administración</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'usuario:reporte_superadmin' %}" class="nav-link">
+                            <i class="bi bi-bar-chart"></i>Reportes
+                        </a>
+                    </li>
+                </ul>
+                <!-- BOTON PARA CERRAR SESION -->
+                <form action="{% url 'logout' %}" method="post" class="mt-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                    </button>
+                </form>
+                <div class="div-footer text-lg-center ">
+                    <p><strong>©Equipo desarrollo T.I. 2025</strong></p>
+                </div>
+            </div>
+
+            <!-- CONTENIDO PRINCIPAL AREA -->
+            <div class="col content-area">
+                <!-- HEADER -->
+                <div class="main-header">
+                    <!-- BIENVENIDA AL SUPERADMINISTRADOR -->
+                    <div>
+                        <h2><i class="bi bi-shield-lock-fill me-2"></i>Panel del Superadministrador</h2>
+                        <p>Bienvenido, {{ superadmin_user.nombre }} ({{ superadmin_user.username }})</p>
+                    </div>
+                    <div>
+                        <!-- MOSTRAMOS DIA ACTUAL -->
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {% now "l, j \d\e F \d\e Y" %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- APARTADO DE CONTEOS GENERALES DE TICKETS -->
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card stat-card card-abierto h-100">
+                            <div class="card-header">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>Tickets Abiertos <!-- ENCABEZADO -->
+                            </div>
+                            <div class="card-body">
+                                <div class="stat-info">
+                                    <div class="stat-count text-primary">{{ tickets_abiertos_count }}</div>
+                                    <div class="stat-label">Requieren atención</div>
+                                </div>
+                                <i class="bi bi-bell-fill stat-icon text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card stat-card card-en-progreso h-100">
+                            <div class="card-header">
+                                <i class="bi bi-hourglass-split me-2"></i>Tickets En Progreso
+                            </div>
+                            <div class="card-body">
+                                <div class="stat-info">
+                                    <div class="stat-count text-warning">{{ tickets_en_progreso_count }}</div>
+                                    <div class="stat-label">En proceso de resolución</div>
+                                </div>
+                                <i class="bi bi-gear stat-icon text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card stat-card card-cerrado h-100">
+                            <div class="card-header">
+                                <i class="bi bi-check2-all me-2"></i>Tickets Cerrados
+                            </div>
+                            <div class="card-body">
+                                <div class="stat-info">
+                                    <div class="stat-count text-success">{{ tickets_cerrado_count }}</div>
+                                    <div class="stat-label">Resueltos satisfactoriamente</div>
+                                </div>
+                                <i class="bi bi-archive stat-icon text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLA DE TODOS LOS TICKETS -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-table me-2"></i>Todos los Tickets del Sistema</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        {% for header in dashboard_headers %}
+                                            <th>{{ header }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in page_obj.object_list %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'tickets:admin_ticket_detail' ticket.id %}" class="fw-bold">
+                                                {{ ticket.id }}
+                                            </a>
+                                        </td>
+                                        <td>{{ ticket.motivo|truncatechars:30 }}</td>
+                                        <td>
+                                            <span class="d-flex align-items-center">
+                                                <i class="bi bi-person-circle me-1"></i>
+                                                {{ ticket.usuario.username }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info text-dark">
+                                                {{ ticket.tipo_soporte }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill 
+                                            {% if ticket.id_estado == 'abierto' %}badge-abierto
+                                            {% elif ticket.id_estado == 'en_progreso' %}badge-en-progreso
+                                            {% elif ticket.id_estado == 'cerrado' %}badge-cerrado
+                                            {% else %}bg-primary{% endif %}">
+                                                {% if ticket.id_estado == 'abierto' %}
+                                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                                {% elif ticket.id_estado == 'en_progreso' %}
+                                                    <i class="bi bi-hourglass-split me-1"></i>
+                                                {% elif ticket.id_estado == 'cerrado' %}
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                {% endif %}
+                                                {{ ticket.get_id_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if ticket.id_prioridad == 'alta' %}
+                                                <span class="text-danger">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Alta
+                                                </span>
+                                            {% elif ticket.id_prioridad == 'media' %}
+                                                <span class="text-warning">
+                                                    <i class="bi bi-dash-circle-fill me-1"></i>Media
+                                                </span>
+                                            {% elif ticket.id_prioridad == 'baja' %}
+                                                <span class="text-success">
+                                                    <i class="bi bi-arrow-down-circle-fill me-1"></i>Baja
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">
+                                                <i class="bi bi-calendar-event me-1"></i>
+                                                {{ ticket.fecha_creacion| date:"d F Y, P"}}
+                                            </span>
+                                            {% comment %} <br>
+                                            <small>{{ ticket.fecha_creacion|date:"H:i" }}</small> {% endcomment %}
+                                        </td>
+                                        <td>
+                                            {% if ticket.asignado_a %}
+                                                <span class="d-flex align-items-center text-success">
+                                                    <i class="bi bi-person-check me-1"></i>
+                                                    {{ ticket.asignado_a.username }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    <i class="bi bi-person-x me-1"></i>
+                                                    Sin asignar
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="{{ dashboard_headers|length }}" class="text-center py-4">
+                                            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                                            <p class="text-muted mt-2">No hay tickets en el sistema.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    
+                        <!-- PAGINACIÓN -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;&laquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                                {% endif %}
+                                
+                                {% for i in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                    {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;&raquo;</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>

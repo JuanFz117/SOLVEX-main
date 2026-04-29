@@ -1,0 +1,276 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cambiar Contraseña</title>
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .login-container {
+      width: 400px;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      padding: 2.5em;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 220px;
+      margin-bottom: 25px;
+    }
+
+    h2 {
+      font-size: 24px;
+      color: #193861;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    h4 {
+      font-size: 15px;
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    .password-requirements {
+      background: #fef5f5;
+      border: 1px solid #f5c6cb;
+      color: #c53030;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      text-align: left;
+    }
+
+    .group {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    input {
+      font-size: 16px;
+      padding: 10px 5px;
+      background: #fff;
+      color: #333;
+      width: 100%;
+      border: none;
+      border-bottom: 2px solid #ccc;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-bottom: 2px solid #2c80ee;
+    }
+
+    label {
+      position: absolute;
+      left: 5px;
+      top: 10px;
+      font-size: 16px;
+      color: #999;
+      pointer-events: none;
+      transition: all 0.2s ease-in-out;
+    }
+
+    input:focus ~ label,
+    input.used ~ label {
+      top: -18px;
+      font-size: 13px;
+      color: #2c80ee;
+    }
+
+    .highlight {
+      position: absolute;
+      height: 60%;
+      width: 100px;
+      top: 25%;
+      left: 0;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    input:focus ~ .highlight {
+      animation: inputHighlighter 0.3s ease;
+    }
+
+    @keyframes inputHighlighter {
+      from { background: #2c80ee; }
+      to { width: 0; background: transparent; }
+    }
+
+    .button {
+      position: relative;
+      padding: 12px 24px;
+      width: 100%;
+      background-color: #2c80ee;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.3s ease;
+      overflow: hidden;
+    }
+
+    .button:hover {
+      background-color: #246ad1;
+    }
+
+    .ripples {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .ripplesCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .ripples.is-active .ripplesCircle {
+      animation: ripples 0.4s ease-in;
+    }
+
+    @keyframes ripples {
+      0% { opacity: 0; }
+      25% { opacity: 1; }
+      100% {
+        width: 200%;
+        padding-bottom: 200%;
+        opacity: 0;
+      }
+    }
+
+    .error-message {
+      background: #ffe5e5;
+      color: #cc0000;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <img src="{% static 'images/SOLVEX_HD.png' %}" alt="Logo" class="login-logo" />
+
+    <h2>Cambiar Contraseña</h2>
+    <h4>Por favor, ingresa tu contraseña actual y la nueva contraseña.</h4>
+
+    <p class="password-requirements">
+      La contraseña debe contener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial.
+    </p>
+
+    <form method="post" class="login-form">
+      {% csrf_token %}
+
+      <div class="group">
+        {{ form.old_password }}
+        <span class="highlight"></span>
+        <label for="{{ form.old_password.id_for_label }}">Contraseña actual</label>
+      </div>
+
+      <div class="group">
+        {{ form.new_password1 }}
+        <span class="highlight"></span>
+        <label for="{{ form.new_password1.id_for_label }}">Nueva contraseña</label>
+      </div>
+
+      <div class="group">
+        {{ form.new_password2 }}
+        <span class="highlight"></span>
+        <label for="{{ form.new_password2.id_for_label }}">Confirmar nueva contraseña</label>
+      </div>
+
+      {% if form.errors %}
+        <div class="error-message">
+          Por favor revisa los campos e intenta nuevamente.
+        </div>
+      {% endif %}
+
+      <button type="submit" class="button">
+        Cambiar Contraseña
+        <div class="ripples"><span class="ripplesCircle"></span></div>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    // Ripple effect
+    const buttons = document.querySelectorAll('.button');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        const ripple = this.querySelector('.ripples');
+        const circle = this.querySelector('.ripplesCircle');
+
+        ripple.classList.remove('is-active');
+
+        const rect = this.getBoundingClientRect();
+        circle.style.top = `${e.clientY - rect.top}px`;
+        circle.style.left = `${e.clientX - rect.left}px`;
+        ripple.classList.add('is-active');
+      });
+    });
+
+    // Floating labels
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.addEventListener('blur', function () {
+        if (this.value !== '') {
+          this.classList.add('used');
+        } else {
+          this.classList.remove('used');
+        }
+      });
+    });
+
+    // Check inputs on page load for pre-filled values (e.g., on form error)
+    document.addEventListener('DOMContentLoaded', function() {
+      inputs.forEach(input => {
+        if (input.value !== '') {
+          input.classList.add('used');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Configurar zona horaria
+TZ=America/Bogota
+
+# Ejecutar el comando de Django a las 7 AM y 4 PM
+0 7 * * * cd /app && /usr/local/bin/python manage.py send_daily_emails >> /var/log/cron.log 2>&1
+0 16 * * * cd /app && /usr/local/bin/python manage.py send_daily_emails >> /var/log/cron.log 2>&1

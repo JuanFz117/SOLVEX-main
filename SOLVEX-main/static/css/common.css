@@ -1,0 +1,29 @@
+/* Estilos comunes para tablas */
+.table {
+    background-color: white;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table th {
+    background-color: var(--light-blue);
+    color: var(--dark-blue);
+    font-weight: bold;
+    text-align: left;
+    padding: 10px;
+}
+
+.table td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.badge {
+    font-size: 0.9rem;
+    padding: 0.5em 0.75em;
+    border-radius: 0.5rem;
+}

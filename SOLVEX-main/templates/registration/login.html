@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/login.js' %}" defer></script>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<body>
+    <div class="page-wrapper">
+        {# --- POPUP PARA MENSAJES --- #}
+                <div id="popup-message" class="popup" style="display:none; position: fixed; top: 20px; right: 20px; background-color: #4CAF50; color: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 1050;">
+                    <span id="popup-message-text"></span>
+                    <button onclick="closePopup()" style="float: right; margin-left: 10px; background: none; border: none; color: white; font-weight: bold; cursor: pointer;">
+                        &times;
+                    </button>
+                </div>
+            
+                <script>
+                    function closePopup() {
+                        document.getElementById('popup-message').style.display = 'none';
+                    }
+                </script>
+        <div class="login-wrapper">
+            <div class="login-container">
+                <img src="{% static 'images/SOLVEX_HD.png' %}" alt="Imagen de inicio de sesión" class="login-logo">
+                <form method="post" class="login-form">
+                    <h2>Registro de ingreso</h2>
+                    {% csrf_token %}
+                    <div class="group">
+                        {{ form.username }}<span class="highlight"></span><span class="bar"></span>
+                        <label for="{{ form.username.id_for_label }}">Usuario</label>
+                    </div>
+                    <div class="group">
+                        {{ form.password }}<span class="highlight"></span><span class="bar"></span>
+                        <label for="{{ form.password.id_for_label }}">Contraseña</label>
+                    </div>
+                    {% if form.errors %}
+                        <div class="error-message">
+                            <p>Usuario o contraseña incorrectos.</p>
+                            <script>
+                                document.getElementById('id_username').value = '';
+                            </script>
+                        </div>
+                    {% endif %}
+                    <button type="submit" class="button buttonBlue">Iniciar Sesión
+                        <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+                    </button>
+                    {% comment %} <img src="{% static 'images/SOLVEX_.png' %}" alt="Imagen de inicio de sesión" class="logo-app"> {% endcomment %}
+                </form>
+            </div>
+        </div>
+        <footer class="footer-main">
+            <div class="div-footer">
+                <p>©Equipo desarrollo T.I. 2025</p>
+            </div>
+        </footer>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Agregar la clase 'used' a los inputs que ya tienen contenido
+            $('input').blur(function() {
+                if ($(this).val()) {
+                    $(this).addClass('used');
+                } else {
+                    $(this).removeClass('used');
+                }
+            });
+            
+            // Efecto de ripple en los botones
+            $(document).on('click', '.button', function(e) {
+                var $ripples = $('.ripples');
+                $ripples.addClass('is-active');
+                
+                setTimeout(function() {
+                    $ripples.removeClass('is-active');
+                }, 400);
+            });
+            
+            // Verificar inputs al cargar
+            $('input').each(function() {
+                if ($(this).val()) {
+                    $(this).addClass('used');
+                }
+            });
+        });
+
+        // --- MANEJO DE MENSAJE POPUP PARA LOGIN ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const successMessage = urlParams.get('success_message');
+
+            if (successMessage) {
+                const popup = document.getElementById('popup-message');
+                const popupText = document.getElementById('popup-message-text');
+                popupText.textContent = successMessage;
+                popup.style.display = 'block';
+                // Remove the success message from the URL so it doesn't persist on refresh
+                urlParams.delete('success_message');
+                const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+                history.replaceState({}, '', newUrl);
+                
+                setTimeout(closePopup, 5000); // Hide after 5 seconds (optional)
+            }
+        });
+
+    </script>
+</body>
+</html>
