@@ -40,11 +40,11 @@ logger = logging.getLogger(__name__)
 
 def es_admin_o_superadmin(user):
     # Asegúrate que los roles coincidan con los definidos en tu modelo Usuario
-    return user.is_authenticated and (user.rol == 'admin' or user.rol == 'superadmin')
+    return user.is_authenticated and user.es_admin_tipo
 
 def es_superadmin(user):
     # Asegúrate que los roles coincidan con los definidos en tu modelo Usuario
-    return user.is_authenticated and user.rol == 'superadmin'
+    return user.is_authenticated and user.es_superaadmin.tipo
 
 def _get_safe_username(user):
     """Devuelve de forma segura el nombre de usuario o un texto alternativo."""
@@ -162,13 +162,13 @@ def post_login_redirect(request):
     Redirige al usuario según su rol después de iniciar sesión.
     """
     user = request.user
-    if es_superadmin(user):
+    if user.es_superadim_tipo:
         # Redirige al panel de administración
         return redirect('usuario:superadmin_dashboard')
-    elif es_admin_o_superadmin(user):
+    elif user.es_admin_tipo:
         # Redirige al panel de administración
         return redirect('usuario:admin_dashboard')
-    elif user.rol == 'colaborador':
+    elif user.rol == Usuario.ROLE_COLABORADOR:
         # Redirige a la vista de tickets usando el namespace
         return redirect('tickets:index')
     else:

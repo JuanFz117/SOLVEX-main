@@ -14,7 +14,7 @@ class UsuarioManager(BaseUserManager):
         except ValueError:
             raise ValidationError('El ID de usuario debe ser un número entero')
         
-        extra_fields.setdefault('rol', 'colaborador')
+        extra_fields.setdefault('rol', 'Usuario.ROLE_COLABORADOR')
         user = self.model(username=username, id_usuario=id_usuario,**extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -24,7 +24,7 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('rol', 'superadmin')
+        extra_fields.setdefault('rol', 'Usuario.ROLE_SUPERADMIN')
         
         if extra_fields.get('is_staff') is not True:
             raise ValueError('El superusuario debe tener is_staff=True.')   
@@ -38,16 +38,25 @@ class Usuario(AbstractUser):
     """
     Modelo de usuario personalizado que extiende AbstractUser y agrega un campo de rol.
     """
-
+# Constantes para Roles
+    ROLE_SUPERADMIN = 'superadmin'
+    ROLE_ADMIN = 'admin'
+    ROLE_COLABORADOR = 'colaborador'
+    
     ROLE_CHOICES = (
-        ('superadmin', 'Superadministrador'),
-        ('admin', 'Administrador'),
-        ('colaborador', 'Colaborador'),
+        (ROLE_SUPERADMIN, 'Superadministrador'),
+        (ROLE_ADMIN, 'Administrador'),
+        (ROLE_COLABORADOR, 'Colaborador'),
     )
+    
+    CAT_SOPORTE_TECNICO ='Soporte Tecnico'
+    CAT_SOPORTE_OPERATIVO ='Soporte Operativo'
+    CAT_DESARROLLO ='Area de Desarrollo'
+    
     CATEGORIAS = [
-        ('Soporte Técnico', 'Soporte Técnico'),
-        ('Soporte Operativo', 'Soporte Operativo'),
-        ('Área de Desarrollo', 'Área de Desarrollo'),
+        ('CAT_SOPORTE_TECNICO', 'Soporte Técnico'),
+        ('CAT_SOPORTE_OPERATIVO', 'Soporte Operativo'),
+        ('CAT_DESARROLLO', 'Área de Desarrollo'),
     ]
 
     id_usuario = models.IntegerField(unique=True, null=False, blank=False, verbose_name= 'ID (cédula)')  # ID único para cada usuario.
@@ -67,3 +76,11 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.id_usuario})"  # Representación legible del usuario.
+    
+    @property
+    def es_admin_tipo(self):
+        return self.rol in [self.ROLE_ADMIN, self.ROLE_SUPERADMIN]
+
+    @property
+    def es_superadmin_tipo(self):
+        return self.rol == self.ROLE_SUPERADMIN

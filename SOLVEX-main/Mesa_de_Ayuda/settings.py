@@ -70,54 +70,54 @@ ASGI_APPLICATION = 'Mesa_de_Ayuda.asgi.application'
 
 
 # CONFIGURACIÓN DE CHANNELS
-# CHANNEL_LAYERS = {
-#     'default': {
-#         # Configuración para desarrollo (en memoria)
-#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        
-#         # Para producción, usar Redis:
-#         # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         # 'CONFIG': {
-#         #     "hosts": [('127.0.0.1', 6379)],
-#         # },
-#     },
-# }
-
-# Para producción con Redis (instalar: pip install channels-redis)
 CHANNEL_LAYERS = {
     'default': {
+        # Configuración para desarrollo (en memoria)
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        
+        # Para producción, usar Redis:
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('redis', 6379)],  # O la dirección de tu servidor Redis
-            "capacity": 1500,
-            "expiry": 60,
+            "hosts": [('127.0.0.1', 6379)],
         },
     },
 }
 
-# CONFIGURACION DOCKER
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
-    }
-}
+# Para producción con Redis (instalar: pip install channels-redis)
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('redis', 6379)],  # O la dirección de tu servidor Redis
+#             "capacity": 1500,
+#             "expiry": 60,
+#         },
+#     },
+# }
 
-# CONFIGURACIÓN LOCAL
+# CONFIGURACION DOCKER
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'helpdesk',
-#         'USER': 'root',
-#         'PASSWORD': '',
-#         'HOST':'localhost',
-#         'PORT':'3306'
+#         'NAME': os.environ.get('DB_NAME'),
+#         'USER': os.environ.get('DB_USER'),
+#         'PASSWORD': os.environ.get('DB_PASSWORD'),
+#         'HOST': os.environ.get('DB_HOST'),
+#         'PORT': os.environ.get('DB_PORT'),
 #     }
 # }
+
+# CONFIGURACIÓN LOCAL
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'helpdesk',
+        'USER': 'root',
+        'PASSWORD': 'admin',
+        'HOST':'localhost',
+        'PORT':'3307'
+    }
+}
 
 AUTH_USER_MODEL = 'usuario.Usuario'  # MODELO A AUTORIZAR
 
@@ -191,7 +191,7 @@ from sendgrid import SendGridAPIClient # type: ignore
 
 # Configuración de SendGrid
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-SENDGRID_FROM_EMAIL = 'actualizaciones@congente.co'  # Tu email verificado en SendGrid
+SENDGRID_FROM_EMAIL = 'aprendiz.ti@congente.coop'  # Tu email verificado en SendGrid
 SENDGRID_REMINDER_TEMPLATE_ID = 'd-e5163493f1db4909b597291ef56b410d' # ID DE PLANTILLA DE RECORDATORIO
 
 
