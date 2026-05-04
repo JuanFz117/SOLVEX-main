@@ -44,7 +44,7 @@ def es_admin_o_superadmin(user):
 
 def es_superadmin(user):
     # Asegúrate que los roles coincidan con los definidos en tu modelo Usuario
-    return user.is_authenticated and user.es_superaadmin.tipo
+    return user.is_authenticated and user.es_superadmin_tipo
 
 def _get_safe_username(user):
     """Devuelve de forma segura el nombre de usuario o un texto alternativo."""
@@ -162,7 +162,7 @@ def post_login_redirect(request):
     Redirige al usuario según su rol después de iniciar sesión.
     """
     user = request.user
-    if user.es_superadim_tipo:
+    if user.es_superadmin_tipo:
         # Redirige al panel de administración
         return redirect('usuario:superadmin_dashboard')
     elif user.es_admin_tipo:

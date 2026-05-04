@@ -190,6 +190,7 @@ class Tickets(models.Model):
             },
             'Agencia_Corresponsal': dict(cls.AGENCIA_CORRESPONSAL_CHOICES),
             'Administrativa': dict(cls.ADMINISTRATIVA_CHOICES),
+            'Prioridades': dict(Ticket_prioridad.PRIORIDADES),
         }
 
 # ========== Modelo Ticket_comentarios: Representa los comentarios asociados a un ticket. ========== #

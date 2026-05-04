@@ -14,7 +14,7 @@ class UsuarioManager(BaseUserManager):
         except ValueError:
             raise ValidationError('El ID de usuario debe ser un número entero')
         
-        extra_fields.setdefault('rol', 'Usuario.ROLE_COLABORADOR')
+        extra_fields.setdefault('rol', self.model.ROLE_COLABORADOR)
         user = self.model(username=username, id_usuario=id_usuario,**extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -24,7 +24,7 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('rol', 'Usuario.ROLE_SUPERADMIN')
+        extra_fields.setdefault('rol', self.model.ROLE_SUPERADMIN)
         
         if extra_fields.get('is_staff') is not True:
             raise ValueError('El superusuario debe tener is_staff=True.')   
@@ -49,14 +49,14 @@ class Usuario(AbstractUser):
         (ROLE_COLABORADOR, 'Colaborador'),
     )
     
-    CAT_SOPORTE_TECNICO ='Soporte Tecnico'
+    CAT_SOPORTE_TECNICO ='Soporte Técnico'
     CAT_SOPORTE_OPERATIVO ='Soporte Operativo'
-    CAT_DESARROLLO ='Area de Desarrollo'
+    CAT_DESARROLLO ='Área de Desarrollo'
     
     CATEGORIAS = [
-        ('CAT_SOPORTE_TECNICO', 'Soporte Técnico'),
-        ('CAT_SOPORTE_OPERATIVO', 'Soporte Operativo'),
-        ('CAT_DESARROLLO', 'Área de Desarrollo'),
+        (CAT_SOPORTE_TECNICO, 'Soporte Técnico'),
+        (CAT_SOPORTE_OPERATIVO, 'Soporte Operativo'),
+        (CAT_DESARROLLO, 'Área de Desarrollo'),
     ]
 
     id_usuario = models.IntegerField(unique=True, null=False, blank=False, verbose_name= 'ID (cédula)')  # ID único para cada usuario.
@@ -67,12 +67,12 @@ class Usuario(AbstractUser):
     debe_cambiar_contrasena = models.BooleanField(default=True)  # Indica si el usuario debe cambiar su contraseña.
     # username = models.CharField(max_length=150, unique=True) # VOY A UTILIZAR EL USERNAME DEL MODELO PADRE
     categoria = models.CharField(max_length=255, choices=CATEGORIAS ,null=True, blank=True)  # Categoría del usuario.
-    rol = models.CharField(max_length=20, choices=ROLE_CHOICES, default='colaborador')  # Rol del usuario.
+    rol = models.CharField(max_length=255, choices=ROLE_CHOICES, default='colaborador')  # Rol del usuario.
 
     objects = UsuarioManager()
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['nombre', 'cargo', 'id_usuario', 'email']  # Campos obligatorios al crear un superusuario]
+    REQUIRED_FIELDS = ['nombre', 'cargo', 'id_usuario', 'email', 'rol', 'categoria']  # Campos obligatorios al crear un superusuario]
 
     def __str__(self):
         return f"{self.username} ({self.id_usuario})"  # Representación legible del usuario.

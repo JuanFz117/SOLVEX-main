@@ -380,8 +380,8 @@ SOLVEX HelpDesk - Sistema de gestión de tickets
                                         <label class="form-label">Prioridad</label>
                                         <select name="id_prioridad" class="form-select" required>
                                             <option value="" hidden>Escoge una opción</option>
-                                            {% for prioridad in id_prioridad %}
-                                                <option value="{{ prioridad.id_prioridad }}">{{ prioridad.get_id_prioridad_display }}</option>
+                                            {% for value, text in opciones_soporte.Prioridades.items %}
+                                                <option value="{{ value }}">{{ text }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
