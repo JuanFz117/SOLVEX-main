@@ -84,3 +84,11 @@ class Usuario(AbstractUser):
     @property
     def es_superadmin_tipo(self):
         return self.rol == self.ROLE_SUPERADMIN
+
+    @property
+    def es_colaborador(self):
+        return self.is_authenticated and self.rol == self.ROLE_COLABORADOR
+
+    @property
+    def es_admin_o_superadmin(self):
+        return self.is_authenticated and (self.rol == self.ROLE_ADMIN or self.rol == self.ROLE_SUPERADMIN)
