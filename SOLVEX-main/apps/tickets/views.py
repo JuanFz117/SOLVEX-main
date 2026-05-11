@@ -1,7 +1,6 @@
-"""
-Vistas del módulo de tickets - Refactorizado siguiendo el patrón Fat Models, Thin Views.
-Toda la lógica de negocio se ha movido a models.py.
-"""
+# Vistas del módulo de tickets - Refactorizado siguiendo el patrón Fat Models, Thin Views.
+# Toda la lógica de negocio se ha movido a models.py.
+
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -12,7 +11,7 @@ from typing import Any
 from .forms import TicketsForm, ComentarioForm
 from .models import Tickets, Ticket_prioridad, Ticket_comentarios
 from apps.usuario.models import Usuario
-from apps.usuario.views import _send_admin_dashboard_update
+
 
 
 # ============================================
@@ -118,7 +117,7 @@ def admin_ticket_detail(request, ticket_id: int):
     admin_user = request.user
     es_superadmin = admin_user.es_superadmin_tipo
     
-    can_comment = ticket.id_estado == 'en_progreso' and ticket.asignado_a == admin_user
+    can_comment = ticket.estado_id == 'en_progreso' and ticket.asignado_a == admin_user
     
     if request.method == 'POST':
         if can_comment:

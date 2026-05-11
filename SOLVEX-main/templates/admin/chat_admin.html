@@ -413,14 +413,14 @@
                         </h1>
                         <div class="d-flex">
                             {% if not es_superadmin %}
-                                <button id="btnTomarTicket" type="button" class="btn text-white btn-sm me-2" data-bs-toggle="modal" data-bs-target="#tomarTicketModal" style="display: none;">
+                                <button id="btnTomarTicket" type="button" class="btn text-white btn-sm me-2" data-bs-toggle="modal" data-bs-target="#tomarTicketModal">
                                     <i class="bi bi-hand-thumbs-up me-1"></i> <strong>Tomar Ticket</strong>
                                 </button>
-                                <button id="btnReasignarTicket" type="button" class="btn btn-sm text-white me-2" data-bs-toggle="modal" data-bs-target="#reasignarTicketModal" style="display: none;">
+                                <button id="btnReasignarTicket" type="button" class="btn btn-sm text-white me-2" data-bs-toggle="modal" data-bs-target="#reasignarTicketModal">
                                     <i class="bi bi-arrow-repeat me-1"></i> <strong>Reasignar</strong>
                                 </button>
                             
-                                <button id="btnCerrarTicket" type="button" class="btn btn-sm text-white" data-bs-toggle="modal" data-bs-target="#cerrarTicketModal" style="display: none;">
+                                <button id="btnCerrarTicket" type="button" class="btn btn-sm text-white" data-bs-toggle="modal" data-bs-target="#cerrarTicketModal">
                                     <i class="bi bi-check2-circle me-1"></i> <strong>Marcar como Resuelto / Cerrar</strong>
                                 </button>
                             {% endif %}
@@ -942,6 +942,7 @@
             }
 
             function updateActionButtonVisibility(newStatusValue, asignadoAUUsername) {
+                console.log('Estado del ticket:', newStatusValue);
                 const btnTomarTrigger = document.getElementById('btnTomarTicket');
                 const btnReasignarTrigger = document.getElementById('btnReasignarTicket');
                 const btnCerrarTrigger = document.getElementById('btnCerrarTicket');

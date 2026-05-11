@@ -1,226 +1,292 @@
 from django.db import models
-# from usuario.models import Usuario
 from datetime import datetime
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Count, Case, When, IntegerField
 
-# ============= Modelo Ticket_estado: Define los estados posibles de un ticket. ============ #
-class Ticket_estado(models.Model):
-    ESTADOS = [
-        ('abierto', 'Abierto'),
-        ('en_progreso', 'En Progreso'),
-        ('cerrado', 'Cerrado'),
-    ]
-    id_estado = models.CharField(max_length=20, choices=ESTADOS, primary_key=True) # ID único para cada estado.
-    
-    def __str__(self):
-        return self.get_id_estado_display()  # Devuelve la representación legible del estado.
+# ==============================================================================
+# 1. TABLAS MAESTRAS (Catálogos Dinámicos)
+# ==============================================================================
 
-# ============== Modelo Ticket_prioridad: Define las prioridades posibles de un ticket. ============= #
-class Ticket_prioridad(models.Model):
-    PRIORIDADES = [
-        ('alta', 'Alta'),
-        ('media', 'Media'),
-        ('baja', 'Baja'),
-    ]
-    id_prioridad = models.CharField(max_length=20, choices=PRIORIDADES, primary_key=True) # ID único para cada prioridad.
-    
-    def __str__(self):
-        return self.get_id_prioridad_display()  # Devuelve la representación legible de la prioridad.
-    
-# ============= Manager personalizado para Tickets ============= #
-class TicketsManager(models.Manager):
-    """Manager personalizado para optimizar consultas de tickets."""
-    
-    def get_queryset(self):
-        return super().get_queryset().select_related('usuario', 'asignado_a')
-    
-    def abiertos_por_usuario(self, usuario):
-        """Obtiene tickets abiertos o en progreso de un usuario."""
-        return self.get_queryset().filter(
-            Q(id_estado="abierto") | Q(id_estado="en_progreso"),
-            usuario=usuario
-        )
-    
-    def cerrados_por_usuario(self, usuario):
-        """Obtiene tickets cerrados de un usuario."""
-        return self.get_queryset().filter(usuario=usuario, id_estado="cerrado")
-    
-    def con_comentarios(self):
-        """Prefetch comentarios para evitar N+1 queries."""
-        return self.get_queryset().prefetch_related('Comentarios')
-    
-# ============= Modelo Tickets: Representa los tickets creados por los colaboradores. ============= #
-class Tickets(models.Model):
-    objects = TicketsManager()
-    TIPO_DE_SOPORTE = [
-        ('Soporte Técnico', 'Soporte Técnico'),
-        ('Soporte Operativo', 'Soporte Operativo'),
-        ('Área de Desarrollo', 'Área de Desarrollo'),
-    ]
-
-    MOTIVO_CIERRE_CHOICES = [
-        ('resuelto', 'Resuelto'),
-        ('error_aplicativo', 'Error de aplicativo'),
-        ('error_usuario', 'Error de usuario'),
-        ('falta_capacitacion', 'Falta de capacitación'),
-        ('duplicado', 'Ticket duplicado'),
-        ('no_corresponde', 'No corresponde a esta área'),
-    ]
-
-    # Constants for hardcoded values in views
-    AGENCIA_CORRESPONSAL_CHOICES = [
-        ('No Aplica', 'No Aplica'),
-        ('Agencia Principal', 'Agencia Principal'),
-        ('Agencia Popular', 'Agencia Popular'),
-        ('Agencia Catama', 'Agencia Catama'),
-        ('Agencia Porfía', 'Agencia Porfía'),
-        ('Agencia Montecarlo', 'Agencia Montecarlo'),
-        ('Agencia Acacías', 'Agencia Acacías'),
-        ('Agencia Vistahermosa', 'Agencia Vistahermosa'),
-        ('Agencia Guayabetal', 'Agencia Guayabetal'),
-        ('Agencia Barranca de Upía', 'Agencia Barranca de Upía'),
-        ('Agencia Cabuyaro', 'Agencia Cabuyaro'),
-        ('Agencia Puerto Gaitán', 'Agencia Puerto Gaitán'),
-        ('Corresponsal Puerto López', 'Corresponsal Puerto López'),
-        ('Corresponsal El Castillo', 'Corresponsal El Castillo'),
-        ('Corresponsal Lejanías', 'Corresponsal Lejanías'),
-        ('Corresponsal Puerto Lleras', 'Corresponsal Puerto Lleras'),
-        ('Corresponsal Puerto Rico', 'Corresponsal Puerto Rico'),
-        ('Corresponsal Cumaral', 'Corresponsal Cumaral'),
-        ('Corresponsal Mesetas', 'Corresponsal Mesetas'),
-        ('Corresponsal Uribe', 'Corresponsal Uribe'),
-        ('Corresponsal Yopal', 'Corresponsal Yopal'),
-        ('Corresponsal Villanueva', 'Corresponsal Villanueva')
-    ]
-
-    ADMINISTRATIVA_CHOICES = [
-        ('No Aplica', 'No Aplica'),
-        ('Gerencia General', 'Gerencia General'),
-        ('Gerencia Innovación y Transformación', 'Gerencia Innovación y Transformación'),
-        ('Gerencia Comercial', 'Gerencia Comercial'),
-        ('Oficial de Cumplimiento', 'Oficina de Cumplimiento'),
-        ('Oficial de Riesgo', 'Oficial de Riesgo'),
-        ('Servicios Administrativos', 'Servicios Administrativos'),
-        ('Talento Humano', 'Talento Humano'),
-        ('Operaciones', 'Operaciones'),
-        ('Contabilidad', 'Contabilidad'),
-        ('Revisoría', 'Revisoría'),
-        ('Auditoria', 'Auditoria'),
-        ('Credito', 'Credito'),
-        ('Cartera', 'Cartera'),
-        ('Cobranza', 'Cobranza'),
-        ('Garantías', 'Garantías'),
-        ('Comunicaciones', 'Comunicaciones'),
-        ('Convenios', 'Convenios'),
-        ('Canales', 'Canales'),
-    ]
-
-    # Table headers constants
-    TICKET_ABIERTO_HEADERS = ['ID', 'Motivo', 'Tipo de Soporte', 'Estado', 'Prioridad', 'Fecha de Creación']
-    TICKET_CERRADO_HEADERS = ['ID', 'Motivo', 'Tipo de Soporte', 'Estado', 'Fecha de Creación', 'Fecha de Solución']
-    TICKET_DETALLE_HEADERS = ['ID', 'Tipo de Soporte', 'Area reportada', 'Estado', 'Prioridad', 'Fecha de Creación']
-
-    id = models.AutoField(primary_key=True)  # ID único para cada ticket.
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Tickets_creados', on_delete=models.CASCADE, null=True, blank=True)  # Relación con el colaborador que crea el ticket.
-    id_estado = models.CharField(max_length=20, choices=Ticket_estado.ESTADOS, default="abierto")  # Estado del ticket, predeterminado a "abierto".
-    id_prioridad = models.CharField(max_length=20, choices=Ticket_prioridad.PRIORIDADES, null=True, blank=True)  # Prioridad del ticket.
-    fecha_creacion = models.DateTimeField(auto_now_add=True)  # Fecha de creación automática.
-    fecha_asignacion = models.DateTimeField(null=True, blank=True)  # Fecha de asignación (se llena cuando el ticket se asigna).
-    fecha_cierre = models.DateTimeField(null=True, blank=True)  # Fecha de cierre (se llena cuando el ticket se cierra).
-    motivo_cierre = models.CharField(max_length=255, choices=MOTIVO_CIERRE_CHOICES, null=True, blank=True)  # Motivo de cierre (cuando cierre el caso).
-    asignado_a = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Tickets_asignados', on_delete=models.CASCADE, null=True, blank=True)  # Colaborador asignado al ticket.
-    motivo = models.CharField(max_length=255, null=False, blank=False) # Motivo del soporte
-    tipo_soporte = models.CharField(max_length=255, null=False, blank=False)  # Tipo de soporte (técnico u operativo).
-    agencia_corresponsal = models.CharField(max_length=255, null=False, blank=False)  # Agencia o corresponsal asociado.
-    administrativa = models.CharField(max_length=255, null=False, blank=False)  # Área administrativa.
-    detalle = models.TextField(blank=False, null=False)  # Detalle del ticket.
-    adjuntos = models.FileField(upload_to='', blank=True, null=True)  # Archivos adjuntos (opcionales).
-
-    def __str__(self):
-        return f'Ticket {self.id} - {self.usuario.username  if self.usuario else "Sin asignar"}'  # Representación legible del ticket.
+class TipoSoporte(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
 
     class Meta:
-        ordering = ['-fecha_creacion']  # Ordenar tickets por fecha de creacion mas reciente.
-        verbose_name = 'Ticket'  # Nombre singular en el admin.
-        verbose_name_plural = 'Tickets'  # Nombre plural en el admin.
+        verbose_name = 'Tipo de Soporte'
+        verbose_name_plural = 'Tipos de Soporte'
+        ordering = ['nombre']
 
-    # Métodos para cambiar el estado del ticket.
-    def asignar_ticket(self):
-        """Marca el ticket como 'En Progreso' y registra la fecha de asignación."""
+    def __str__(self):
+        return self.nombre
+
+
+class AgenciaCorresponsal(models.Model):
+    nombre = models.CharField(max_length=150, unique=True)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Agencia / Corresponsal'
+        verbose_name_plural = 'Agencias y Corresponsales'
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class AreaAdministrativa(models.Model):
+    nombre = models.CharField(max_length=150, unique=True)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Área Administrativa'
+        verbose_name_plural = 'Áreas Administrativas'
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class MotivoCierre(models.Model):
+    # ¡Corregido! Incluye el campo código para filtrar fácilmente en reportes
+    codigo = models.CharField(max_length=50, unique=True)
+    nombre = models.CharField(max_length=150)
+
+    class Meta:
+        verbose_name = 'Motivo de Cierre'
+        verbose_name_plural = 'Motivos de Cierre'
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+# ==============================================================================
+# 2. ESTADOS Y PRIORIDADES (Cero código quemado)
+# ==============================================================================
+# ¡Corregido! Ya no hay listas quemadas (ESTADOS o PRIORIDADES) aquí.
+
+class Ticket_estado(models.Model):
+    id_estado = models.CharField(max_length=20, primary_key=True)
+    nombre = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Estado de Ticket'
+        verbose_name_plural = 'Estados de Ticket'
+
+    def __str__(self):
+        return self.nombre
+
+
+class Ticket_prioridad(models.Model):
+    id_prioridad = models.CharField(max_length=20, primary_key=True)
+    nombre = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Prioridad de Ticket'
+        verbose_name_plural = 'Prioridades de Ticket'
+
+    def __str__(self):
+        return self.nombre
+
+
+# ==============================================================================
+# 3. GESTOR DE CONSULTAS (Manager Optimizado)
+# ==============================================================================
+
+class TicketsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'usuario', 'asignado_a',
+            'tipo_soporte', 'agencia_corresponsal',
+            'administrativa', 'motivo_cierre'
+        )
+
+    # --- Métodos de Colaboradores ---
+    def abiertos_por_usuario(self, usuario):
+        return self.get_queryset().filter(
+            Q(id_estado='abierto') | Q(id_estado='en_progreso'),
+            usuario=usuario
+        )
+
+    # ¡Corregido! Agregado método faltante
+    def cerrados_por_usuario(self, usuario):
+        return self.get_queryset().filter(usuario=usuario, id_estado='cerrado')
+
+    # --- Métodos de Administradores ---
+    def abiertos_por_categoria(self, tipo_soporte_id):
+        return self.get_queryset().filter(
+            Q(id_estado='abierto') | Q(id_estado='en_progreso'),
+            tipo_soporte_id=tipo_soporte_id
+        ).order_by('-fecha_creacion')
+
+    # ¡Corregido! Agregado método faltante
+    def cerrados_por_categoria(self, tipo_soporte_id):
+        return self.get_queryset().filter(
+            id_estado='cerrado',
+            tipo_soporte_id=tipo_soporte_id
+        )
+
+    # --- Métodos Globales y Utilidades ---
+    def todos_ordenados(self):
+        return self.get_queryset().order_by('-fecha_creacion')
+
+    # ¡Corregido! Agregado prefetch faltante
+    def con_comentarios(self):
+        return self.get_queryset().prefetch_related('Comentarios')
+
+
+# ==============================================================================
+# 4. MODELO PRINCIPAL DE TICKETS
+# ==============================================================================
+
+class Tickets(models.Model):
+    objects = TicketsManager()
+
+    # ¡Corregido! TODOS los headers incluidos
+    TICKET_ABIERTO_HEADERS = ['ID', 'Motivo', 'Tipo de Soporte', 'Estado', 'Prioridad', 'Fecha de Creación']
+    TICKET_CERRADO_HEADERS = ['ID', 'Motivo', 'Tipo de Soporte', 'Estado', 'Fecha de Creación', 'Fecha de Solución']
+    TICKET_DETALLE_HEADERS = ['ID', 'Tipo de Soporte', 'Área Reportada', 'Estado', 'Prioridad', 'Fecha de Creación']
+    TICKET_ADMIN_HEADERS = ['ID', 'Motivo', 'Usuario', 'Tipo de Soporte', 'Estado', 'Prioridad', 'Fecha de Creación']
+    TICKET_ADMIN_CERRADO_HEADERS = ['ID', 'Motivo', 'Usuario', 'Tipo de Soporte', 'Estado', 'Fecha de Creación', 'Fecha de Solución']
+    TICKET_SUPERADMIN_HEADERS = ['ID', 'Motivo', 'Usuario', 'Tipo de Soporte', 'Estado', 'Prioridad', 'Fecha de Creación', 'Asignado A']
+
+    id = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Tickets_creados', on_delete=models.CASCADE, null=True, blank=True)
+    
+    # Estados y Prioridades sin choices
+    id_estado = models.CharField(max_length=20, default='abierto')
+    id_prioridad = models.CharField(max_length=20, null=True, blank=True)
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_asignacion = models.DateTimeField(null=True, blank=True)
+    fecha_cierre = models.DateTimeField(null=True, blank=True)
+
+    asignado_a = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Tickets_asignados', on_delete=models.CASCADE, null=True, blank=True)
+
+    motivo = models.CharField(max_length=255)
+    detalle = models.TextField()
+
+    # ForeignKeys a tablas maestras (Mi contribución: Integridad referencial)
+    tipo_soporte = models.ForeignKey(TipoSoporte, on_delete=models.PROTECT, verbose_name='Tipo de Soporte')
+    agencia_corresponsal = models.ForeignKey(AgenciaCorresponsal, on_delete=models.PROTECT, verbose_name='Agencia / Corresponsal')
+    administrativa = models.ForeignKey(AreaAdministrativa, on_delete=models.PROTECT, verbose_name='Área Administrativa')
+    motivo_cierre = models.ForeignKey(MotivoCierre, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Motivo de Cierre')
+
+    adjuntos = models.FileField(upload_to='tickets/', blank=True, null=True)
+
+    class Meta:
+        ordering = ['-fecha_creacion']
+        verbose_name = 'Ticket'
+        verbose_name_plural = 'Tickets'
+
+    def __str__(self):
+        return f'Ticket {self.id} - {self.usuario.username if self.usuario else "Sistema"}'
+
+    # --- Lógica de Negocio (Fat Model) ---
+    
+    def asignar_ticket(self, admin_user):
         self.fecha_asignacion = datetime.now()
         self.id_estado = 'en_progreso'
+        self.asignado_a = admin_user
         self.save()
 
-    def cerrar_ticket(self):
-        """Cierra el ticket y registra la fecha de cierre."""
+    def cerrar_ticket(self, motivo_obj):
         self.fecha_cierre = datetime.now()
         self.id_estado = 'cerrado'
+        self.motivo_cierre = motivo_obj
         self.save()
 
+    def get_estado_display(self):
+        try:
+            return Ticket_estado.objects.get(id_estado=self.id_estado).nombre
+        except Ticket_estado.DoesNotExist:
+            return self.id_estado
+
+    def get_prioridad_display(self):
+        if not self.id_prioridad: return '—'
+        try:
+            return Ticket_prioridad.objects.get(id_prioridad=self.id_prioridad).nombre
+        except Ticket_prioridad.DoesNotExist:
+            return self.id_prioridad
+
     def preparar_datos_para_websocket(self):
-        """
-        Prepara los datos del ticket para enviar vía WebSocket.
-        """
         from django.urls import reverse
         return {
             'id': self.id,
             'motivo': self.motivo,
-            'usuario_username': self.usuario.username,
-            'tipo_soporte': self.tipo_soporte,
-            'estado_display': self.get_id_estado_display(),
-            'estado_value': self.id_estado,
-            'prioridad_display': self.get_id_prioridad_display(),
-            'prioridad_value': self.id_prioridad,
+            'usuario_username': self.usuario.username if self.usuario else 'Sistema',
+            'tipo_soporte': self.tipo_soporte.nombre,
+            'estado_display': self.get_estado_display(),
             'fecha_creacion': self.fecha_creacion.isoformat(),
-            'url_detalle_admin': reverse('tickets:admin_ticket_detail', kwargs={'ticket_id': self.id})
         }
 
-    # Métodos para obtener opciones de formularios
+    # --- MÉTODOS DE CLASE PARA REPORTES Y DASHBOARDS ---
+
+    @classmethod
+    def conteos_por_categoria(cls, tipo_soporte_id):
+        return cls.objects.filter(tipo_soporte_id=tipo_soporte_id).aggregate(
+            abiertos=Count(Case(When(id_estado='abierto', then=1), output_field=IntegerField())),
+            en_progreso=Count(Case(When(id_estado='en_progreso', then=1), output_field=IntegerField())),
+            cerrado=Count(Case(When(id_estado='cerrado', then=1), output_field=IntegerField())),
+        )
+
+    @classmethod
+    def conteos_superadmin(cls):
+        return cls.objects.aggregate(
+            abiertos=Count(Case(When(id_estado='abierto', then=1), output_field=IntegerField())),
+            en_progreso=Count(Case(When(id_estado='en_progreso', then=1), output_field=IntegerField())),
+            cerrado=Count(Case(When(id_estado='cerrado', then=1), output_field=IntegerField())),
+        )
+
+    @classmethod
+    def get_areas_para_reporte(cls):
+        agencias = (
+            AgenciaCorresponsal.objects
+            .filter(activo=True)
+            .exclude(nombre__iexact='No Aplica')
+            .values_list('nombre', flat=True)
+        )
+        areas = (
+            AreaAdministrativa.objects
+            .filter(activo=True)
+            .exclude(nombre__iexact='No Aplica')
+            .values_list('nombre', flat=True)
+        )
+        return sorted(set(list(agencias) + list(areas)))
+
     @classmethod
     def get_opciones_soporte(cls):
-        """
-        Obtiene las opciones de soporte para los formularios.
-        """
         return {
-            'Tipo_de_Soporte': {
-                'Soporte Técnico': 'Soporte Técnico',
-                'Soporte Operativo': 'Soporte Operativo',
-                'Área de Desarrollo': 'Área de Desarrollo'
-            },
-            'Agencia_Corresponsal': dict(cls.AGENCIA_CORRESPONSAL_CHOICES),
-            'Administrativa': dict(cls.ADMINISTRATIVA_CHOICES),
-            'Prioridades': dict(Ticket_prioridad.PRIORIDADES),
+            'Tipo_de_Soporte': TipoSoporte.objects.all(),
+            'Agencia_Corresponsal': AgenciaCorresponsal.objects.filter(activo=True),
+            'Administrativa': AreaAdministrativa.objects.filter(activo=True),
+            'Prioridades': Ticket_prioridad.objects.all(),
         }
 
-# ========== Modelo Ticket_comentarios: Representa los comentarios asociados a un ticket. ========== #
+
+# ==============================================================================
+# 5. HISTORIAL DE COMENTARIOS
+# ==============================================================================
+
 class Ticket_comentarios(models.Model):
-    id_comment = models.AutoField(primary_key=True)  # ID único para cada comentario.
-    id_ticket = models.ForeignKey(Tickets, on_delete=models.CASCADE, related_name='Comentarios')  # Relación con el ticket.
-    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name= 'Comentarios_realizados')  # Relación con el colaborador que hizo el comentario.
-    hora_comentario = models.DateTimeField(auto_now_add=True)  # Fecha y hora del comentario.
-    detalle_comentario = models.TextField(blank=False, null=False)  # Contenido del comentario.
-    adjunto = models.FileField(upload_to='comentarios/', blank=True, null=True)  # Archivos adjuntos al comentario (opcionales).
+    id_comment = models.AutoField(primary_key=True)
+    id_ticket = models.ForeignKey(Tickets, on_delete=models.CASCADE, related_name='Comentarios')
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='Comentarios_realizados')
+    hora_comentario = models.DateTimeField(auto_now_add=True)
+    detalle_comentario = models.TextField()
+    adjunto = models.FileField(upload_to='comentarios/', blank=True, null=True)
 
     def __str__(self):
-        user_display = self.autor.username if self.autor else "Sistema"
-        return f"Comentario {self.id_comment} en Ticket {self.id_ticket.id} por {user_display}"
+        user_display = self.autor.username if self.autor else 'Sistema'
+        return f'Comentario {self.id_comment} en Ticket {self.id_ticket.id} por {user_display}'
 
     @classmethod
     def crear_comentario(cls, ticket, autor, detalle_comentario, adjunto=None):
-        """
-        Crea un nuevo comentario para un ticket.
-        """
         return cls.objects.create(
-            id_ticket=ticket,
-            autor=autor,
-            detalle_comentario=detalle_comentario,
+            id_ticket=ticket, 
+            autor=autor, 
+            detalle_comentario=detalle_comentario, 
             adjunto=adjunto
         )
 
     def puede_ser_editado_por(self, usuario):
-        """
-        Verifica si un usuario puede editar este comentario.
-        Por ahora, solo el autor puede editar.
-        """
         return self.autor == usuario

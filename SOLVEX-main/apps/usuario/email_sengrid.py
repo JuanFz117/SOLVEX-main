@@ -9,7 +9,7 @@ from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
-def enviar_correo_recordatorio(destinatario_email, destinatario_nombre, ticket, ultimo_mensaje_relevante, es_para_admin=False):
+def enviar_correo_recordatorio(destinatario_email, destinatario_nombre, ticket, ultimo_mensaje_relevante, es_para_admin=False,tiempo_inactivo="8 horas"):
     """
     Construye y envía un correo de recordatorio usando SendGrid.
     """
@@ -48,6 +48,7 @@ def enviar_correo_recordatorio(destinatario_email, destinatario_nombre, ticket, 
         'priority_color': priority_color_map.get(ticket.id_prioridad, priority_color_map[None]),
         'ticket_message': ultimo_mensaje_relevante if ultimo_mensaje_relevante else "No hay mensajes recientes del analista.",
         'ticket_url': ticket_url,
+        'tiempo_inactivo': tiempo_inactivo,
     }
 
     mensaje = Mail(
@@ -136,12 +137,34 @@ def procesar_recordatorios_tickets():
         logger.debug(f"Ticket ID: {ticket.id} - Limite de tiempo para recordatorio: {limite_tiempo}")
 
         if ultima_actividad_fecha and ultima_actividad_fecha < limite_tiempo:
-
+            
+            diferencia = ahora - ultima_actividad_fecha
+            horas_inactivo = int(diferencia.total_seconds() // 3600)
+            tiempo_mensaje = f"{horas_inactivo} horas"
             logger.info(f"Ticket ID: {ticket.id} - CALIFICA para recordatorio. Última actividad fue el {ultima_actividad_fecha}, límite: {limite_tiempo}.")
             destinatario_email = None
             destinatario_nombre = None
             es_para_admin = False
             mensaje_para_plantilla = ultimo_mensaje_texto
+            
+            
+            if horas_inactivo < 24:
+                tiempo_mensaje = f"{horas_inactivo} horas"
+            elif horas_inactivo < 48:
+                dias = horas_inactivo // 24
+                horas_restantes = horas_inactivo % 24
+                if horas_restantes > 0:
+                    tiempo_mensaje = f"{dias} día y {horas_restantes} horas"
+                else:
+                    tiempo_mensaje = f"{dias} día"
+            else:
+                dias = horas_inactivo // 24
+                horas_restantes = horas_inactivo % 24
+                if horas_restantes > 0:
+                    tiempo_mensaje = f"{dias} días y {horas_restantes} horas"
+                else:
+                    tiempo_mensaje = f"{dias} días"
+
 
             if ultimo_comentarista_fue_colaborador:
                 # RECORDATORIO PARA EL ADMIN ASIGNADO
@@ -172,7 +195,8 @@ def procesar_recordatorios_tickets():
                     destinatario_nombre,
                     ticket,
                     mensaje_para_plantilla,
-                    es_para_admin = es_para_admin
+                    es_para_admin = es_para_admin,
+                    tiempo_inactivo=tiempo_mensaje 
                 )
         elif ultima_actividad_fecha:
             # logger.info(f"Ticket {ticket.id}: Última actividad fue el {ultima_actividad_fecha}, dentro del límite de 24 horas.")
