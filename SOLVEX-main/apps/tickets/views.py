@@ -11,7 +11,7 @@ from typing import Any
 from .forms import TicketsForm, ComentarioForm
 from .models import Tickets, Ticket_prioridad, Ticket_comentarios
 from apps.usuario.models import Usuario
-
+from apps.usuario.views import _send_admin_dashboard_update
 
 
 # ============================================
