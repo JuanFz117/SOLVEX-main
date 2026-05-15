@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.conf import settings
 from sendgrid import SendGridAPIClient # type: ignore
 from sendgrid.helpers.mail import Mail # type: ignore
-from apps.tickets.models import Tickets, Ticket_comentarios # Corregida la importación
+from apps.tickets.models import Tickets, Ticket_comentarios 
 from django.urls import reverse
 
 logger = logging.getLogger(__name__)
@@ -20,14 +20,6 @@ def enviar_correo_recordatorio(destinatario_email, destinatario_nombre, ticket, 
     if not settings.SENDGRID_REMINDER_TEMPLATE_ID:
         logger.error("SENDGRID_REMINDER_TEMPLATE_ID no configurada en settings.py")
         return False
-
-    priority_color_map = {
-        'alta': '#d9534f',  # Rojo
-        'media': '#f0ad4e', # Naranja/Amarillo
-        'baja': '#5cb85c',   # Verde
-        None: '#6c757d',     # Gris por defecto
-        '': '#6c757d'        # Gris por defecto
-    }
 
     ticket_url = ""
     try:
@@ -45,7 +37,7 @@ def enviar_correo_recordatorio(destinatario_email, destinatario_nombre, ticket, 
         'ticket_subject': ticket.motivo,
         'created_date': ticket.fecha_creacion.strftime('%d/%m/%Y %I:%M %p') if ticket.fecha_creacion else 'N/A',
         'priority': ticket.get_id_prioridad_display() if ticket.id_prioridad else 'No asignada',
-        'priority_color': priority_color_map.get(ticket.id_prioridad, priority_color_map[None]),
+        'priority_color': Tickets.PRIORITY_COLOR_MAP.get(ticket.id_prioridad,Tickets.PRIORITY_COLOR_MAP[None]),
         'ticket_message': ultimo_mensaje_relevante if ultimo_mensaje_relevante else "No hay mensajes recientes del analista.",
         'ticket_url': ticket_url,
         'tiempo_inactivo': tiempo_inactivo,
@@ -72,7 +64,7 @@ def procesar_recordatorios_tickets():
     Verificar los tickets "En Progreso" Y envia recordatorios si es necesario.
     Esta función debería ser llamada por una tarea programada diariamente.
     """
-    print("DEBUG: Iniciando procesar_recordatorios_tickets()")
+    
     ahora = timezone.now()
     # La línea de abajo define el umbral de inactividad.
     limite_tiempo = ahora - timedelta(hours=8) # LIMITE DE 8 HORAS
@@ -80,7 +72,6 @@ def procesar_recordatorios_tickets():
     tickets_en_progreso = Tickets.objects.filter(id_estado='en_progreso')
 
     logger.info(f"Procesando recordatorios para {tickets_en_progreso.count()} tickets en progreso.")
-    print(f"DEBUG: Tickets en proggreso encontrados: {tickets_en_progreso.count()}")
     
     for ticket in tickets_en_progreso:
         ultima_actividad_fecha = None

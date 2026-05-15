@@ -214,7 +214,7 @@ def admin_dashboard(request):
     return render(request, 'admin/admin.html', {
         'admin_user': admin_user,
         'page_obj': page_obj,
-        # Headers desde el modelo, no quemados en la vista
+        # Headers desde el modelo
         'dashboard_headers': Tickets.TICKET_ADMIN_HEADERS,
         'tickets_abiertos_count': conteos['abiertos'],
         'tickets_en_progreso_count': conteos['en_progreso'],
@@ -233,7 +233,7 @@ def tickets_page_admin(request):
     """
     usuario_actual = request.user
 
-    # Método del manager reemplaza el filter() quemado
+    # Método del manager 
     tickets_cerrados = Tickets.objects.cerrados_por_categoria(usuario_actual.categoria)
 
     paginator = Paginator(tickets_cerrados, 10)
@@ -242,7 +242,7 @@ def tickets_page_admin(request):
     return render(request, 'admin/tickets_admin.html', {
         'posts2': page_obj,
         'colaborador': usuario_actual,
-        # Headers desde el modelo, no quemados en la vista
+        # Headers desde el modelo
         'tickets_generales2': Tickets.TICKET_ADMIN_RESUELTOS_HEADERS,
     })
 
@@ -710,12 +710,12 @@ def generar_grafico_mensual(tickets_filtrados, titulo='Dashboard de Tickets por 
         for e, v, p in zip(estados, valores, porcentajes)
     ]
     ax1.legend(wedges, etiquetas_leyenda, loc='center left',
-               bbox_to_anchor=(0, 0.5), fontsize=9, frameon=True,
-               title='Estados', title_fontsize=10)
+        bbox_to_anchor=(0, 0.5), fontsize=9, frameon=True,
+        title='Estados', title_fontsize=10)
     circle = plt.Circle((0, 0), 0.25, fc='white')
     ax1.add_artist(circle)
     ax1.text(0, 0, f'Total\n{total}', ha='center', va='center',
-             fontsize=12, fontweight='bold')
+        fontsize=12, fontweight='bold')
     ax1.set_title('Distribución por Estado', fontsize=12, fontweight='bold')
 
     # Panel 2: Barras horizontales
@@ -727,7 +727,7 @@ def generar_grafico_mensual(tickets_filtrados, titulo='Dashboard de Tickets por 
     ax2.set_yticklabels([NOMBRES_ESTADO[e] for e in estados])
     for i, (bar, valor, porcentaje) in enumerate(zip(bars, valores, porcentajes)):
         ax2.text(valor + total * 0.01, i, f'{valor} ({porcentaje:.1f}%)',
-                 va='center', fontsize=10, fontweight='bold')
+            va='center', fontsize=10, fontweight='bold')
     ax2.set_xlabel('Cantidad de Tickets', fontsize=10, fontweight='bold')
     ax2.set_title('Comparativa por Estado', fontsize=12, fontweight='bold')
     ax2.grid(axis='x', linestyle='--', alpha=0.7)
@@ -767,32 +767,32 @@ def generar_grafico_mensual(tickets_filtrados, titulo='Dashboard de Tickets por 
         for estado in ['abierto', 'en_progreso', 'cerrado']:
             valores_estado = [fechas[k][estado] for k in sorted(fechas.keys())]
             ax3.plot(x_labels, valores_estado, marker='o', linewidth=2,
-                     label=NOMBRES_ESTADO[estado], color=COLORES_ESTADO[estado])
+                label=NOMBRES_ESTADO[estado], color=COLORES_ESTADO[estado])
 
         totales = [
             sum(fechas[k][e] for e in ['abierto', 'en_progreso', 'cerrado'])
             for k in sorted(fechas.keys())
         ]
         ax3.plot(x_labels, totales, marker='s', linewidth=3,
-                 color='black', label='Total')
+                color='black', label='Total')
 
         for i, (x, y) in enumerate(zip(x_labels, totales)):
             ax3.annotate(str(y), (i, y), xytext=(0, 5),
-                         textcoords='offset points', ha='center', fontsize=9)
+                textcoords='offset points', ha='center', fontsize=9)
 
         if len(totales) > 1:
             x_num = np.arange(len(totales))
             z = np.polyfit(x_num, totales, 1)
             p = np.poly1d(z)
             ax3.plot(x_labels, p(x_num), 'r--', linewidth=1.5,
-                     alpha=0.7, label='Tendencia')
+                alpha=0.7, label='Tendencia')
             pendiente = z[0]
             if abs(pendiente) >= 0.1:
                 tendencia_texto = 'creciente' if pendiente > 0 else 'decreciente'
                 ax3.text(0.02, 0.98,
-                         f'Tendencia {tendencia_texto}: {abs(pendiente):.1f} tickets/mes',
-                         transform=ax3.transAxes, fontsize=9, va='top', ha='left',
-                         bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.5))
+                    f'Tendencia {tendencia_texto}: {abs(pendiente):.1f} tickets/mes',
+                    transform=ax3.transAxes, fontsize=9, va='top', ha='left',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.5))
 
         ax3.set_xlabel('Mes', fontsize=10, fontweight='bold')
         ax3.set_ylabel('Cantidad de Tickets', fontsize=10, fontweight='bold')
@@ -802,7 +802,7 @@ def generar_grafico_mensual(tickets_filtrados, titulo='Dashboard de Tickets por 
         plt.setp(ax3.get_xticklabels(), rotation=45, ha='right', fontsize=9)
     else:
         ax3.text(0.5, 0.5, 'No hay datos con fechas válidas para mostrar tendencia',
-                 ha='center', va='center', fontsize=12)
+            ha='center', va='center', fontsize=12)
         ax3.axis('off')
 
     fig.suptitle(titulo, fontsize=16, fontweight='bold', y=0.98)

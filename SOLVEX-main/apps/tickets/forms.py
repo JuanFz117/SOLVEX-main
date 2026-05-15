@@ -12,6 +12,7 @@ class TicketsForm(forms.ModelForm):
             'agencia_corresponsal',
             'administrativa',
             'id_prioridad',
+            'motivo', 
             'detalle',
             'adjuntos',
         ]

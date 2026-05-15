@@ -60,9 +60,8 @@ class MotivoCierre(models.Model):
 
 
 # ==============================================================================
-# 2. ESTADOS Y PRIORIDADES (Cero código quemado)
+# 2. ESTADOS Y PRIORIDADES 
 # ==============================================================================
-# ¡Corregido! Ya no hay listas quemadas (ESTADOS o PRIORIDADES) aquí.
 
 class Ticket_estado(models.Model):
     id_estado = models.CharField(max_length=20, primary_key=True)
@@ -87,7 +86,6 @@ class Ticket_prioridad(models.Model):
     def __str__(self):
         return self.nombre
 
-
 # ==============================================================================
 # 3. GESTOR DE CONSULTAS (Manager Optimizado)
 # ==============================================================================
@@ -107,7 +105,6 @@ class TicketsManager(models.Manager):
             usuario=usuario
         )
 
-    # ¡Corregido! Agregado método faltante
     def cerrados_por_usuario(self, usuario):
         return self.get_queryset().filter(usuario=usuario, id_estado='cerrado')
 
@@ -118,7 +115,6 @@ class TicketsManager(models.Manager):
             tipo_soporte_id=tipo_soporte_id
         ).order_by('-fecha_creacion')
 
-    # ¡Corregido! Agregado método faltante
     def cerrados_por_categoria(self, tipo_soporte_id):
         return self.get_queryset().filter(
             id_estado='cerrado',
@@ -129,7 +125,6 @@ class TicketsManager(models.Manager):
     def todos_ordenados(self):
         return self.get_queryset().order_by('-fecha_creacion')
 
-    # ¡Corregido! Agregado prefetch faltante
     def con_comentarios(self):
         return self.get_queryset().prefetch_related('Comentarios')
 
@@ -140,8 +135,21 @@ class TicketsManager(models.Manager):
 
 class Tickets(models.Model):
     objects = TicketsManager()
+    
+    # ============================================================
+    # CONSTANTES DE COLORES PARA PRIORIDADES (SendGrid)
+    # ============================================================
 
-    # ¡Corregido! TODOS los headers incluidos
+    PRIORITY_COLOR_MAP = {
+        'alta': '#d9534f',   # Rojo
+        'media': '#f0ad4e',  # Naranja/Amarillo
+        'baja': '#5cb85c',   # Verde
+        None: '#6c757d',     # Gris por defecto
+        '': '#6c757d'        # Gris por defecto
+    }
+    
+    # ============================================================
+
     TICKET_ABIERTO_HEADERS = ['ID', 'Motivo', 'Tipo de Soporte', 'Estado', 'Prioridad', 'Fecha de Creación']
     TICKET_CERRADO_HEADERS = ['ID', 'Motivo', 'Tipo de Soporte', 'Estado', 'Fecha de Creación', 'Fecha de Solución']
     TICKET_DETALLE_HEADERS = ['ID', 'Tipo de Soporte', 'Área Reportada', 'Estado', 'Prioridad', 'Fecha de Creación']
@@ -152,7 +160,7 @@ class Tickets(models.Model):
     id = models.AutoField(primary_key=True)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Tickets_creados', on_delete=models.CASCADE, null=True, blank=True)
     
-    # Estados y Prioridades sin choices
+    # Estados y Prioridades
     id_estado = models.CharField(max_length=20, default='abierto')
     id_prioridad = models.CharField(max_length=20, null=True, blank=True)
 
@@ -181,7 +189,7 @@ class Tickets(models.Model):
     def __str__(self):
         return f'Ticket {self.id} - {self.usuario.username if self.usuario else "Sistema"}'
 
-    # --- Lógica de Negocio (Fat Model) ---
+    # --- Lógica de Negocio---
     
     def asignar_ticket(self, admin_user):
         self.fecha_asignacion = datetime.now()

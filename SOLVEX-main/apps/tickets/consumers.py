@@ -7,7 +7,6 @@ from channels.db import database_sync_to_async # type: ignore
 from django.core.files.base import ContentFile 
  
 # IMPORTAR MODELOS
-from apps.usuario.models import Usuario
 from apps.tickets.models import Tickets, Ticket_comentarios
 
 logger = logging.getLogger(__name__)
@@ -178,11 +177,12 @@ class TicketChatConsumer(AsyncWebsocketConsumer):
         comentario_obj = None
         try:
             ticket = Tickets.objects.get(id=ticket_id)
-            comentario_obj = Ticket_comentarios.objects.create(
-                id_ticket=ticket,
+            comentario_obj = Ticket_comentarios.crear_comentario(
+                ticket=ticket,
                 autor=user,
                 detalle_comentario=message
             )
+
             logger.info(f"Comentario guardado ID:{comentario_obj.id_comment} para ticket {ticket_id} por usuario {user.username}")
 
         except Tickets.DoesNotExist:
